@@ -27,8 +27,8 @@ public class SecurityConfig {
                         exchanges
                                 .pathMatchers(HttpMethod.OPTIONS, "/**")
                                 .permitAll()
-                                .pathMatchers(HttpMethod.POST, "/users")
-                                .permitAll()
+//                                .pathMatchers(HttpMethod.POST, "/users")
+//                                .permitAll()
 //                                .requestMatchers("/error/**")
 //                                .permitAll()
 //                                .requestMatchers(HttpMethod.GET, "/actuator/**")

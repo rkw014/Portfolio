@@ -26,9 +26,9 @@ public class GatewayApplication {
 	public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
 		return builder.routes()
 				.route("user-service-route", r -> r
-						.path("/users/**")
-//						// 自定义过滤器，向下游服务传递用户信息
-//						.filters(f -> f.filter(new AddUserIdGatewayFilter()))
+						.path("/api/users/**")
+//						.filters(f -> f.rewritePath("/api/users/(?<segment>.*)", "/users/${segment}"))
+						.filters(f -> f.filter(new RateLimiterFilter()))
 						.uri("http://localhost:6100")
 				)
 				.build();

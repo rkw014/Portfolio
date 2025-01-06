@@ -1,19 +1,72 @@
 package com.rk.portfolio.user_service.controller;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RestController;
+import com.rk.portfolio.user_service.model.User;
+import com.rk.portfolio.user_service.service.UserService;
+import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.time.LocalDateTime;
+import java.util.Optional;
 
 @RestController
+@RequestMapping("/api/users")
 public class UserController {
+    @Autowired
+    private UserService userService;
 
-    @PostMapping(path = "/users")
-    public String postUser(){
-        return "user Posted";
-    }
-
-    @GetMapping(path = "/users")
+    @GetMapping()
     public String getUser(){
         return "user Got";
+    }
+
+    @PostMapping()
+    @Transactional
+    public ResponseEntity<String> createUser(@RequestBody User user){
+        Optional<User> curUser = userService.getUserById(user.getId());
+        if (curUser.isEmpty()){
+            user.setCreatedAt(LocalDateTime.now());
+            user.setUpdatedAt(LocalDateTime.now());
+            User createdUser = userService.createUser(user);
+        }
+        return ResponseEntity.ok("OK");
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<String> getUserById(@PathVariable String id) {
+        Optional<User> user = userService.getUserById(id);
+        if(user.isPresent()){return ResponseEntity.ok("OK");}
+        return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<String> updateUser(@PathVariable String id, @RequestBody User userDetails) {
+        Optional<User> existingUser = userService.getUserById(id);
+        if (existingUser.isPresent()) {
+            User user = existingUser.get();
+            user.setUserName(userDetails.getUserName());
+            user.setEmail(userDetails.getEmail());
+            user.setUpdatedAt(LocalDateTime.now());
+            User updatedUser = userService.updateUser(user);
+            return ResponseEntity.ok("OK");
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // Delete User
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
+        Optional<User> existingUser = userService.getUserById(id);
+        if (existingUser.isPresent()) {
+            userService.deleteUser(id);
+            return ResponseEntity.ok().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 }
