@@ -7,24 +7,10 @@ spring:
 
   security:
     oauth2:
-      client:
-        registration:
-          cognito:
-            client-id: 40vjhb2c0mn5d1rrdmmnovh1a4
-            client-secret: 959r16do3d4j1n9crfnaec9c4qa3e9n9cebo7d2boughet6rf3j
-            userPoolId: us-east-1_o5Efqy7Be
-            scope:
-              - phone
-              - openid
-              - email
-            # Spring Security by default uses a redirect-uri in the format: {baseUrl}/login/oauth2/code/{registrationId}
-            # For example: http://localhost:8080/login/oauth2/code/cognito
-            # See more: https://docs.spring.io/spring-security/reference/servlet/oauth2/login/core.html#oauth2login-sample-redirect-uri
-            redirect-uri: https://d84l1y8p4kdic.cloudfront.net
-        provider:
-          cognito:
-            issuerUri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_o5Efqy7Be
-            user-name-attribute: username
+      resourceserver:
+        jwt:
+          jwk-set-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_1V4xEEg04/.well-known/jwks.json
+
 
 logging:
   level:
