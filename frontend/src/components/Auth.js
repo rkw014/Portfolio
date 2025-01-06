@@ -22,7 +22,7 @@ const Auth = () => {
     }
 
     if (auth.isAuthenticated) {
-        window.auth = auth;
+        // window.auth = auth;
         let user_exist = localStorage.getItem(auth.user?.profile.sub);
         if (!user_exist && !posted) {
             setPosted(true);
@@ -32,19 +32,19 @@ const Auth = () => {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            "Authorization": `Bearer ${auth.user?.access_token}`
+                            "Authorization": `Bearer ${auth.user?.id_token}`
                         },
                         "body": JSON.stringify(auth.user?.profile),
                     });
 
+                    const txt = await resp.text();
                     if(!resp.ok){ 
                         if(resp.status !== 500){
-                            console.error("Backend failed: ", await resp.text())
+                            console.error("Backend failed: ", txt)
                         }
                     }
                     console.log(resp);
-                    const rcnt = await resp.text();
-                    if(rcnt === 'OK'){
+                    if(txt === 'OK'){
                         localStorage.setItem(auth.user?.profile.sub, '1');
                     }
                 }catch(e){
@@ -56,9 +56,9 @@ const Auth = () => {
         return (
             <div>
                 <pre> Hello: {auth.user?.profile.email} </pre>
-                {/* <pre> ID Token: {auth.user?.id_token} </pre>
+                <pre> ID Token: {auth.user?.id_token} </pre>
                 <pre> Access Token: {auth.user?.access_token} </pre>
-                <pre> Refresh Token: {auth.user?.refresh_token} </pre> */}
+                {/* <pre> Refresh Token: {auth.user?.refresh_token} </pre> */}
 
 
                 <button onClick={() => auth.removeUser()}>Sign out</button>

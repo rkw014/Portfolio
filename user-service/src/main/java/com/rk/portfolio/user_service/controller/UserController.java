@@ -24,12 +24,22 @@ public class UserController {
 
     @PostMapping()
     @Transactional
-    public ResponseEntity<String> createUser(@RequestBody User user){
-        Optional<User> curUser = userService.getUserById(user.getId());
+    public ResponseEntity<String> createUser(
+            @RequestHeader("X-User-Id") String userId,
+            @RequestHeader("X-User-Email") String email,
+            @RequestHeader("X-User-Name") String userName,
+            @RequestBody User user
+    ){
+        Optional<User> curUser = userService.getUserById(userId);
         if (curUser.isEmpty()){
-            user.setCreatedAt(LocalDateTime.now());
-            user.setUpdatedAt(LocalDateTime.now());
-            User createdUser = userService.createUser(user);
+            User newUser = new User(
+                    userId,
+                    email,
+                    userName,
+                    LocalDateTime.now(),
+                    LocalDateTime.now()
+            );
+            User createdUser = userService.createUser(newUser);
         }
         return ResponseEntity.ok("OK");
     }
