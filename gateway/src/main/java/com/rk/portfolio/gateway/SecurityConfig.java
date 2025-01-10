@@ -24,17 +24,17 @@ public class SecurityConfig {
          */
 
         http.authorizeExchange((exchanges) ->
-                        exchanges
-                                .pathMatchers(HttpMethod.OPTIONS, "/**")
-                                .permitAll()
-//                                .pathMatchers(HttpMethod.POST, "/users")
-//                                .permitAll()
-//                                .requestMatchers("/swagger-ui/**")
-//                                .permitAll()
-//                                .requestMatchers("/v3/api-docs/**")
-//                                .permitAll()
-                                .anyExchange()
-                                .authenticated()
+            exchanges
+                .pathMatchers(HttpMethod.OPTIONS, "/**")
+                .permitAll()
+                .pathMatchers("/api/users/**")
+                .authenticated()
+                .pathMatchers(HttpMethod.GET, "/api/blogs/**")
+                .permitAll()
+                .pathMatchers("/api/blogs/**")
+                .authenticated()
+                .anyExchange()
+                .denyAll()
         );
 
         http.oauth2ResourceServer( (oauth2) -> oauth2.jwt(Customizer.withDefaults()));
@@ -48,14 +48,15 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedMethods(List.of(
-                HttpMethod.GET.name(),
-                HttpMethod.PUT.name(),
-                HttpMethod.POST.name(),
-                HttpMethod.DELETE.name()
+            HttpMethod.GET.name(),
+            HttpMethod.PUT.name(),
+            HttpMethod.POST.name(),
+            HttpMethod.DELETE.name(),
+            HttpMethod.OPTIONS.name()
         ));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration.applyPermitDefaultValues());
+        source.registerCorsConfiguration("/**", configuration);
         return source;
     }
 }

@@ -37,7 +37,8 @@ public class UserController {
                     email,
                     userName,
                     LocalDateTime.now(),
-                    LocalDateTime.now()
+                    LocalDateTime.now(),
+                    0L
             );
             User createdUser = userService.createUser(newUser);
         }

@@ -1,9 +1,11 @@
 package com.rk.portfolio.gateway;
 
+import java.net.SocketAddress;
 import java.time.Duration;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
@@ -26,6 +28,13 @@ public class RateLimiterFilter implements GatewayFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        if (exchange.getRequest().getMethod() == HttpMethod.OPTIONS) {
+            return chain.filter(exchange);
+        }
+        java.net.InetSocketAddress remoteAddress = exchange.getRequest().getRemoteAddress();
+        if (remoteAddress == null || remoteAddress.getHostString() == null){
+            return chain.filter(exchange);
+        }
         String ip = exchange.getRequest().getRemoteAddress().getHostString();
         Bucket bucket = cache.computeIfAbsent(ip, k -> createNewBucket());
 

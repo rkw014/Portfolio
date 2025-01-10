@@ -33,4 +33,8 @@ public class User {
     @JsonIgnore
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
+
+    @Version
+    @JsonIgnore
+    private Long version;
 }

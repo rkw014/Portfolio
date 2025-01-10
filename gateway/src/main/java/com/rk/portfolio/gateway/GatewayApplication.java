@@ -18,6 +18,9 @@ public class GatewayApplication {
 	@Bean
 	public RouteLocator gatewayRoutes(RouteLocatorBuilder builder) {
 		return builder.routes()
+			// ==========================
+			// 1. User Service Route
+			// ==========================
 			.route("user-service-route", r -> r
 				.path("/api/users/**")
 //						.filters(f -> f.rewritePath("/api/users/(?<segment>.*)", "/users/${segment}"))
@@ -26,6 +29,19 @@ public class GatewayApplication {
 					.filter(new NewUserGatewayFilter())
 				)
 				.uri("http://localhost:6100")
+			)
+			// ==========================
+			// 2. Blog Service Route
+			// ==========================
+			.route("blog-service-route", r -> r
+				.path("/api/blogs/**")
+				.filters(f -> f
+					.filter(new RateLimiterFilter())
+					.filter(new NewUserGatewayFilter())
+				// .rewritePath("/api/blog/(?<segment>.*)", "/blog/${segment}")
+				)
+				// The blog service is private, but available at this internal URL
+				.uri("http://localhost:6200")
 			)
 			.build();
 	}
