@@ -9,9 +9,11 @@ spring:
     oauth2:
       resourceserver:
         jwt:
-          jwk-set-uri: https://cognito-idp.us-east-1.amazonaws.com/us-east-1_1V4xEEg04/.well-known/jwks.json
+          jwk-set-uri: ${JWK-SET-URI}
 
 
 logging:
   level:
     org.springframework.cloud.gateway: DEBUG
+
+DEBUG: true

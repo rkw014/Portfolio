@@ -1,23 +1,18 @@
 package com.rk.portfolio.gateway;
 
-//import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
-//import org.springframework.cloud.gateway.filter.ServerWebExchangeDecorator;
-//import org.springframework.cloud.gateway.filter.ServerWebExchangeUtils;
-import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ServerWebExchange;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
-//import org.springframework.cloud.gateway.filter.OrderedGatewayFilter;
-//import org.springframework.core.Ordered;
 import reactor.core.publisher.Mono;
+import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 
 public class NewUserGatewayFilter implements GatewayFilter {
 
     @Override
-    public Mono<Void> filter(ServerWebExchange exchange, org.springframework.cloud.gateway.filter.GatewayFilterChain chain) {
+    public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
 
         return ReactiveSecurityContextHolder.getContext()
             .flatMap(securityContext -> {

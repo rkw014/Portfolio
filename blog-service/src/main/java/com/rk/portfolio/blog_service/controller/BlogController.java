@@ -20,6 +20,11 @@ public class BlogController {
     @Autowired
     private S3Service s3Service;
 
+    @GetMapping
+    public ResponseEntity<String> test() {
+        return ResponseEntity.ok("blog got");
+    }
+
     @PostMapping
     @Transactional
     public ResponseEntity<BlogPost> createPost(@RequestBody BlogPost post) {
@@ -63,12 +68,12 @@ public class BlogController {
      *
      * @param filename name of the file user wants to upload
      */
-    @GetMapping("/presign")
-    @Transactional
-    public ResponseEntity<String> presignUpload(@RequestParam String filename) {
-        // Best practice: Generate unique object keys if needed, e.g., with a user ID or timestamp
-        String objectKey = "uploads/blog-images/" + filename;
-        URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
-        return ResponseEntity.ok(presignedUrl.toString());
-    }
+//    @GetMapping("/presign")
+//    @Transactional
+//    public ResponseEntity<String> presignUpload(@RequestParam String filename) {
+//        // Best practice: Generate unique object keys if needed, e.g., with a user ID or timestamp
+//        String objectKey = "uploads/blog-images/" + filename;
+//        URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
+//        return ResponseEntity.ok(presignedUrl.toString());
+//    }
 }

@@ -16,21 +16,21 @@ public class S3Service {
     @Value("${app.s3.bucket}")
     private String bucketName;
 
-    public URL generatePresignedUploadUrl(String objectKey) {
-        // S3Presigner can use the default credential provider chain (e.g., env vars, instance profile)
-        try (S3Presigner presigner = S3Presigner.create()) {
-            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
-                    .bucket(bucketName)
-                    .key(objectKey)
-                    // Content type, ACL, etc. can be specified
-                    .build();
-
-            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
-                    .putObjectRequest(putObjectRequest)
-                    .signatureDuration(Duration.ofMinutes(15)) // 15 minutes
-                    .build();
-
-            return presigner.presignPutObject(presignRequest).url();
-        }
-    }
+//    public URL generatePresignedUploadUrl(String objectKey) {
+//        // S3Presigner can use the default credential provider chain (e.g., env vars, instance profile)
+//        try (S3Presigner presigner = S3Presigner.create()) {
+//            PutObjectRequest putObjectRequest = PutObjectRequest.builder()
+//                    .bucket(bucketName)
+//                    .key(objectKey)
+//                    // Content type, ACL, etc. can be specified
+//                    .build();
+//
+//            PutObjectPresignRequest presignRequest = PutObjectPresignRequest.builder()
+//                    .putObjectRequest(putObjectRequest)
+//                    .signatureDuration(Duration.ofMinutes(15)) // 15 minutes
+//                    .build();
+//
+//            return presigner.presignPutObject(presignRequest).url();
+//        }
+//    }
 }

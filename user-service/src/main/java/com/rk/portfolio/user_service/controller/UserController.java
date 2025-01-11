@@ -30,32 +30,31 @@ public class UserController {
             @RequestHeader("X-User-Name") String userName,
             @RequestBody User user
     ){
-        Optional<User> curUser = userService.getUserById(userId);
+        Optional<User> curUser = userService.getUserBySub(userId);
         if (curUser.isEmpty()){
-            User newUser = new User(
-                    userId,
-                    email,
-                    userName,
-                    LocalDateTime.now(),
-                    LocalDateTime.now(),
-                    0L
-            );
+            User newUser = new User();
+            newUser.setSub( userId);
+            newUser.setEmail(email);
+            newUser.setUserName(userName);
+            newUser.setCreatedAt(LocalDateTime.now());
+            newUser.setUpdatedAt(LocalDateTime.now());
+            newUser.setVersion(0L);
             User createdUser = userService.createUser(newUser);
+            return ResponseEntity.ok("OK " + createdUser.getId().toString());
         }
         return ResponseEntity.ok("OK");
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<String> getUserById(@PathVariable String id) {
-        Optional<User> user = userService.getUserById(id);
-        if(user.isPresent()){return ResponseEntity.ok("OK");}
-        return ResponseEntity.notFound().build();
+    @GetMapping("/{sub}")
+    public ResponseEntity<User> getUserBySub(@PathVariable String sub) {
+        Optional<User> user = userService.getUserBySub(sub);
+        return user.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{sub}")
     @Transactional
-    public ResponseEntity<String> updateUser(@PathVariable String id, @RequestBody User userDetails) {
-        Optional<User> existingUser = userService.getUserById(id);
+    public ResponseEntity<String> updateUser(@PathVariable String sub, @RequestBody User userDetails) {
+        Optional<User> existingUser = userService.getUserBySub(sub);
         if (existingUser.isPresent()) {
             User user = existingUser.get();
             user.setUserName(userDetails.getUserName());
@@ -69,12 +68,12 @@ public class UserController {
     }
 
     // Delete User
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/{sub}")
     @Transactional
-    public ResponseEntity<Void> deleteUser(@PathVariable String id) {
-        Optional<User> existingUser = userService.getUserById(id);
+    public ResponseEntity<Void> deleteUser(@PathVariable String sub) {
+        Optional<User> existingUser = userService.getUserBySub(sub);
         if (existingUser.isPresent()) {
-            userService.deleteUser(id);
+            userService.deleteUser(existingUser.get().getSub());
             return ResponseEntity.ok().build();
         } else {
             return ResponseEntity.notFound().build();

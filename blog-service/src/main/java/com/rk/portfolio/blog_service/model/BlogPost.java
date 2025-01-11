@@ -1,7 +1,11 @@
 package com.rk.portfolio.blog_service.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
+
+import java.io.Serial;
+import java.io.Serializable;
 
 @Entity
 @Table(name = "blog_posts")
@@ -10,7 +14,9 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class BlogPost {
+public class BlogPost implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 10L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -25,5 +31,9 @@ public class BlogPost {
     private String coverImageUrl;
 
     private boolean published;
+
+    @Version
+    @JsonIgnore
+    private Long version;
 }
 
