@@ -3,6 +3,9 @@ package com.rk.portfolio.blog_service.service;
 import com.rk.portfolio.blog_service.model.BlogPost;
 import com.rk.portfolio.blog_service.repository.BlogPostRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
@@ -17,29 +20,23 @@ public class BlogService {
     @Autowired
     private BlogPostRepository blogPostRepository;
 
-    @Autowired
-    private RedisTemplate<String, Object> redisTemplate;
+//    @Autowired
+//    private RedisTemplate<String, Object> redisTemplate;
 
+    @CachePut(value = "blog", key = "#result.id")
     public BlogPost saveOrUpdate(BlogPost blogPost) {
         BlogPost saved = blogPostRepository.save(blogPost);
-        // Cache the result with a TTL
-        redisTemplate.opsForValue().set(BLOG_CACHE_KEY + saved.getId(), saved, 10, TimeUnit.MINUTES);
         return saved;
     }
 
+    @Cacheable(value = "blog", key = "#id")
     public Optional<BlogPost> findById(Long id) {
-        String key = BLOG_CACHE_KEY + id;
-        BlogPost cached = (BlogPost) redisTemplate.opsForValue().get(key);
-        if (cached != null) {
-            return Optional.of(cached);
-        }
         Optional<BlogPost> post = blogPostRepository.findById(id);
-        post.ifPresent(p -> redisTemplate.opsForValue().set(key, p, 10, TimeUnit.MINUTES));
         return post;
     }
 
+    @CacheEvict(value = "blog", key = "#id")
     public void delete(Long id) {
         blogPostRepository.deleteById(id);
-        redisTemplate.delete(BLOG_CACHE_KEY + id);
     }
 }

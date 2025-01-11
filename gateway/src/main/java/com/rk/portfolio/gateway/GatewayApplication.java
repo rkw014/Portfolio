@@ -23,7 +23,6 @@ public class GatewayApplication {
 			// ==========================
 			.route("user-service-route", r -> r
 				.path("/api/users/**")
-//						.filters(f -> f.rewritePath("/api/users/(?<segment>.*)", "/users/${segment}"))
 				.filters(f -> f
 					.filter(new RateLimiterFilter())
 					.filter(new NewUserGatewayFilter())
@@ -37,8 +36,6 @@ public class GatewayApplication {
 				.path("/api/blogs/**")
 				.filters(f -> f
 					.filter(new RateLimiterFilter())
-					.filter(new NewUserGatewayFilter())
-				// .rewritePath("/api/blog/(?<segment>.*)", "/blog/${segment}")
 				)
 				// The blog service is private, but available at this internal URL
 				.uri("http://localhost:6200")

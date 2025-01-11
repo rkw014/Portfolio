@@ -16,15 +16,15 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
-    }
-
     public User updateUser(User user) {
         return userRepository.save(user);
     }
 
-    public void deleteUser(String id) {
-        userRepository.deleteById(id);
+    public void deleteUser(String sub) {
+        userRepository.deleteBySub(sub);
+    }
+
+    public Optional<User> getUserBySub(String sub) {
+        return userRepository.findBySub(sub);
     }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.NonNull;
 
 import java.time.LocalDateTime;
 
@@ -15,9 +16,12 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Table(name = "users")
 public class User {
-    @JsonProperty("sub")
     @Id
-    private String id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Long id;
+
+    @Column(nullable = false, unique = true)
+    private String sub;
 
     @Column(nullable = false, unique = true)
     private String email;
