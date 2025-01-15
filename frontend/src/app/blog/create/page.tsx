@@ -5,11 +5,10 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
-import  NoSSR  from "../../../components/NoSSR.tsx";
 import axios from "axios";
 
 // Dynamically import react-quill to avoid SSR issues
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
 export default function CreateBlogPage() {
   const [title, setTitle] = useState("");
@@ -35,7 +34,7 @@ export default function CreateBlogPage() {
     };
 
     try {
-      const res = await axios.post("${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs", requestBody, {
+      const res = await axios.post(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs`, requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -76,9 +75,8 @@ export default function CreateBlogPage() {
 
       <div style={{ marginTop: 12 }}>
         <label>Content:</label>
-        <NoSSR>
-            <ReactQuill theme="snow" value={content} onChange={setContent} />
-        </NoSSR>
+          <ReactQuill theme="snow" value={content} onChange={setContent} />
+
       </div>
 
       <button onClick={handleSubmit} style={{ marginTop: 16 }}>

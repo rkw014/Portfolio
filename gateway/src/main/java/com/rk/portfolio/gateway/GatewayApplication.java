@@ -6,7 +6,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.cloud.gateway.route.RouteLocator;
 import org.springframework.cloud.gateway.route.builder.RouteLocatorBuilder;
 
-import java.util.Collections;
 
 @SpringBootApplication
 public class GatewayApplication {

@@ -7,7 +7,10 @@ import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
 
-const ReactQuill = dynamic(() => import("react-quill"), { ssr: false });
+const ReactQuill = dynamic(() => import("react-quill-new"), { 
+  ssr: false,
+  loading: ()=><p>Loading Quill ...</p>
+ });
 
 type BlogPost = {
   id: number;
@@ -92,6 +95,29 @@ export default function EditBlogPage() {
           theme="snow"
           value={post.contentMarkdown}
           onChange={(val) => setPost({ ...post, contentMarkdown: val })}
+          modules={{
+            toolbar: [
+                [{ header: [1, 2, false] }],
+                ['bold', 'italic', 'underline'],
+                ['image', 'code-block'],
+              ]
+          }}
+          // formats={[
+          //   "headers",
+          //   "font",
+          //   "size",
+          //   "bold",
+          //   "italic",
+          //   "underline",
+          //   "strike",
+          //   "blockquote",
+          //   "list",
+          //   "bullet",
+          //   "indent",
+          //   "link",
+          //   "image",
+          // ]}
+          placeholder="Start to type your blog"
         />
       </div>
 
