@@ -6,8 +6,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -23,9 +26,26 @@ public class BlogService {
 //    @Autowired
 //    private RedisTemplate<String, Object> redisTemplate;
 
+    @Transactional
     @CachePut(value = "blog", key = "#result.id")
-    public BlogPost saveOrUpdate(BlogPost blogPost) {
+    public BlogPost save(BlogPost blogPost) {
         BlogPost saved = blogPostRepository.save(blogPost);
+        return saved;
+    }
+
+    @Transactional
+    @CachePut(value = "blog", key = "#result.id")
+    public BlogPost update(Long id, BlogPost updated){
+        Optional<BlogPost> prevPost = blogPostRepository.findById(id);
+        if(prevPost.isEmpty() ){
+            return null;
+        }
+        BlogPost pPost = prevPost.get();
+        pPost.setTitle(updated.getTitle());
+        pPost.setPublished(updated.isPublished());
+        pPost.setCoverImageUrl(updated.getCoverImageUrl());
+        pPost.setContentMarkdown(updated.getContentMarkdown());
+        BlogPost saved = blogPostRepository.save(pPost);
         return saved;
     }
 
@@ -35,6 +55,7 @@ public class BlogService {
         return post;
     }
 
+    @Transactional
     @CacheEvict(value = "blog", key = "#id")
     public void delete(Long id) {
         blogPostRepository.deleteById(id);

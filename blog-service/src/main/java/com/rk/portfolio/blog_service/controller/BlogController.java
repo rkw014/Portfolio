@@ -5,6 +5,7 @@ import com.rk.portfolio.blog_service.service.BlogService;
 import com.rk.portfolio.blog_service.service.S3Service;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.net.URL;
@@ -26,30 +27,21 @@ public class BlogController {
     }
 
     @PostMapping
-    @Transactional
     public ResponseEntity<BlogPost> createPost(@RequestBody BlogPost post) {
-        BlogPost saved = blogService.saveOrUpdate(post);
+        BlogPost saved = blogService.save(post);
         return ResponseEntity.ok(saved);
     }
 
     @PutMapping("/{id}")
-    @Transactional
     public ResponseEntity<BlogPost> updatePost(@PathVariable Long id, @RequestBody BlogPost updated) {
-        Optional<BlogPost> prevPost = blogService.findById(id);
-        if(prevPost.isEmpty()){
+        BlogPost saved = blogService.update(id, updated);
+        if(saved == null){
             return ResponseEntity.notFound().build();
         }
-        BlogPost pPost = prevPost.get();
-        pPost.setTitle(updated.getTitle());
-        pPost.setPublished(updated.isPublished());
-        pPost.setCoverImageUrl(updated.getCoverImageUrl());
-        pPost.setContentMarkdown(updated.getContentMarkdown());
-        BlogPost saved = blogService.saveOrUpdate(pPost);
         return ResponseEntity.ok(saved);
     }
 
     @GetMapping("/{id}")
-    @Transactional
     public ResponseEntity<BlogPost> getPost(@PathVariable Long id) {
         Optional<BlogPost> post = blogService.findById(id);
         return post.map(ResponseEntity::ok)
@@ -57,7 +49,6 @@ public class BlogController {
     }
 
     @DeleteMapping("/{id}")
-    @Transactional
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         blogService.delete(id);
         return ResponseEntity.noContent().build();
