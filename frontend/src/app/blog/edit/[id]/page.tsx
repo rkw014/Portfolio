@@ -7,6 +7,8 @@ import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
 
+import '@/components/quill.snow.css';
+
 const ReactQuill = dynamic(() => import("react-quill-new"), { 
   ssr: false,
   loading: ()=><p>Loading Quill ...</p>

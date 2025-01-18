@@ -7,6 +7,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
 
+import '@/components/quill.snow.css';
+
 // Dynamically import react-quill to avoid SSR issues
 const ReactQuill = dynamic(() => import("react-quill-new"), { ssr: false });
 
