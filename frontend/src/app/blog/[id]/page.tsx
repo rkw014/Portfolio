@@ -5,6 +5,11 @@ import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
+
+import '@/components/quill.snow.css';
+import { useAuth } from "react-oidc-context";
+import Link from "next/link";
+
 type BlogPost = {
   id: number;
   title: string;
@@ -20,6 +25,8 @@ export default function BlogDetailPage() {
 
   const [post, setPost] = useState<BlogPost | null>(null);
 
+  const auth = useAuth();
+  
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
@@ -44,8 +51,13 @@ export default function BlogDetailPage() {
     return <div>Loading...</div>;
   }
 
+  const handleEdit = async () => {
+    router.push(`/blog/edit/${id}`);
+  };
+
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
+      <Link href={"/blog"}>Blogs</Link>
       <h1>{post.title}</h1>
       {post.coverImageUrl && (
         <img
@@ -56,13 +68,19 @@ export default function BlogDetailPage() {
       )}
 
       {/* If contentMarkdown is HTML, we can render with dangerouslySetInnerHTML */}
-      <div
-        style={{ border: "1px solid #ddd", padding: 12 }}
-        dangerouslySetInnerHTML={{ __html: post.contentMarkdown }}
-      />
+      <div className="ql-container ql-snow">
+        <div
+          style={{ border: "1px solid #ddd", padding: 12 }}
+          dangerouslySetInnerHTML={{ __html: post.contentMarkdown }}
+          className="ql-editor"
+        />
+      </div>
       <div style={{ marginTop: 12 }}>
         Published: {post.published ? "Yes" : "No"}
       </div>
+      {auth.user ? (
+        <button onClick={handleEdit}>Edit</button>
+      ) : null }
     </div>
   );
 }
