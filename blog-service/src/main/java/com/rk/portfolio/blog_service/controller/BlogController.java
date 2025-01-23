@@ -3,13 +3,13 @@ package com.rk.portfolio.blog_service.controller;
 import com.rk.portfolio.blog_service.model.BlogPost;
 import com.rk.portfolio.blog_service.service.BlogService;
 import com.rk.portfolio.blog_service.service.S3Service;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import java.net.URL;
+
+import java.util.List;
 import java.util.Optional;
+
 
 @RestController
 @RequestMapping("/api/blogs")
@@ -52,6 +52,12 @@ public class BlogController {
     public ResponseEntity<Void> deletePost(@PathVariable Long id) {
         blogService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/all")
+    public ResponseEntity<List<BlogPost>> listPosts() {
+        List<BlogPost> posts = blogService.findAll();
+        return ResponseEntity.ok(posts);
     }
 
     /**

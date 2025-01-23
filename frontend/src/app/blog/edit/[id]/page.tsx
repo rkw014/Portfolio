@@ -8,19 +8,12 @@ import { useAuth } from "react-oidc-context";
 import axios from "axios";
 
 import '@/components/quill.snow.css';
+import { BlogPost } from "../../../../types/BlogPost";
 
 const ReactQuill = dynamic(() => import("react-quill-new"), { 
   ssr: false,
   loading: ()=><p>Loading Quill ...</p>
  });
-
-type BlogPost = {
-  id: number;
-  title: string;
-  coverImageUrl?: string;
-  contentMarkdown: string;
-  published: boolean;
-};
 
 export default function EditBlogPage() {
   const params = useParams();
@@ -28,9 +21,22 @@ export default function EditBlogPage() {
   const id = params?.id;
 
   const [post, setPost] = useState<BlogPost | null>(null);
+  const [altered, setAlter] = useState<number>(0);
+  const setAltered = () =>{
+    if (altered > 1) return;
+    setAlter(altered + 1);
+  };
 
   const auth = useAuth();
   const token = auth.user?.access_token || "";
+  useEffect(()=>{
+    if(!auth.isLoading && !auth.isAuthenticated){
+      alert("You don't have permission to edit posts.");
+      router.replace(`/blog/${id}`);
+    }
+  }, [auth, router]);
+
+  if (!auth.isAuthenticated) return null;
 
   useEffect(() => {
     if (!id) return;
@@ -61,6 +67,14 @@ export default function EditBlogPage() {
     }
   };
 
+  const handleCancel = () => {
+    if (!post ) return;
+    if (altered > 1) {
+      if (!confirm("Are you sure to discard all changes?")) return;
+    }
+    router.push(`/blog/${post.id}`);
+  };
+
   if (!post) {
     return <div>Loading post...</div>;
   }
@@ -71,14 +85,14 @@ export default function EditBlogPage() {
       <label>Title:</label>
       <input
         value={post.title}
-        onChange={(e) => setPost({ ...post, title: e.target.value })}
+        onChange={(e) => {setAltered(); setPost({ ...post, title: e.target.value });}}
         style={{ width: "100%", marginBottom: 12 }}
       />
 
       <label>Cover Image URL:</label>
       <input
         value={post.coverImageUrl || ""}
-        onChange={(e) => setPost({ ...post, coverImageUrl: e.target.value })}
+        onChange={(e) => {setAltered(); setPost({ ...post, coverImageUrl: e.target.value });}}
         style={{ width: "100%", marginBottom: 12 }}
       />
 
@@ -87,7 +101,7 @@ export default function EditBlogPage() {
         <input
           type="checkbox"
           checked={post.published}
-          onChange={(e) => setPost({ ...post, published: e.target.checked })}
+          onChange={(e) => {setAltered(); setPost({ ...post, published: e.target.checked });}}
         />
       </div>
 
@@ -96,7 +110,7 @@ export default function EditBlogPage() {
         <ReactQuill
           theme="snow"
           value={post.contentMarkdown}
-          onChange={(val) => setPost({ ...post, contentMarkdown: val })}
+          onChange={(val) => {setAltered(); setPost({ ...post, contentMarkdown: val });}}
           modules={{
             toolbar: [
                 [{ header: [1, 2, false] }],
@@ -125,6 +139,9 @@ export default function EditBlogPage() {
 
       <button onClick={handleUpdate} style={{ marginTop: 16 }}>
         Save
+      </button>
+      <button onClick={handleCancel} style={{ marginTop: 16 }}>
+        Cancel
       </button>
     </div>
   );

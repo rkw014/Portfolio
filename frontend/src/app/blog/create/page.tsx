@@ -1,7 +1,7 @@
 // app/blog/create/page.tsx
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
@@ -19,9 +19,24 @@ export default function CreateBlogPage() {
   const [content, setContent] = useState("");
   const router = useRouter();
 
+  
+  const [altered, setAlter] = useState<number>(0);
+  const setAltered = () =>{
+    if (altered > 1) return;
+    setAlter(altered + 1);
+  };
+
   // Get token from OIDC context
   const auth = useAuth();
   const token = auth.user?.access_token || "";
+  useEffect(()=>{
+    if(!auth.isLoading && !auth.isAuthenticated){
+      alert("You don't have permission to edit posts.");
+      router.replace(`/blog`);
+    }
+  }, [auth, router]);
+
+  if (!auth.isAuthenticated) return null;
 
   const handleSubmit = async () => {
     if (!title) {
@@ -49,20 +64,27 @@ export default function CreateBlogPage() {
     }
   };
 
+  const handleCancel = () => {
+    if (altered > 1) {
+      if (!confirm("Are you sure to discard all changes?")) return;
+    }
+    router.push(`/blog`);
+  };
+
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <h1>Create a New Blog Post</h1>
       <label>Title:</label>
       <input
         value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        onChange={(e) => {setAltered(); setTitle(e.target.value)}}
         style={{ width: "100%", marginBottom: 12 }}
       />
 
       <label>Cover Image URL:</label>
       <input
         value={coverImageUrl}
-        onChange={(e) => setCoverImageUrl(e.target.value)}
+        onChange={(e) => {setAltered(); setCoverImageUrl(e.target.value)}}
         style={{ width: "100%", marginBottom: 12 }}
       />
 
@@ -71,18 +93,24 @@ export default function CreateBlogPage() {
         <input
           type="checkbox"
           checked={published}
-          onChange={(e) => setPublished(e.target.checked)}
+          onChange={(e) => {setAltered(); setPublished(e.target.checked)}}
         />
       </div>
 
       <div style={{ marginTop: 12 }}>
         <label>Content:</label>
-          <ReactQuill theme="snow" value={content} onChange={setContent} />
+          <ReactQuill 
+            theme="snow" 
+            value={content} 
+            onChange={(v)=>{setAltered(); setContent(v)}} />
 
       </div>
 
       <button onClick={handleSubmit} style={{ marginTop: 16 }}>
         Save
+      </button>
+      <button onClick={handleCancel} style={{ marginTop: 16 }}>
+        Cancel
       </button>
     </div>
   );
