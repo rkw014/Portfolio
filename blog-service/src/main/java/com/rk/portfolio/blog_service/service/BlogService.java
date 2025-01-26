@@ -10,9 +10,6 @@ import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.redis.core.HashOperations;
-import org.springframework.data.redis.core.ListOperations;
-import org.springframework.data.redis.core.RedisOperations;
-import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,9 +24,6 @@ public class BlogService {
     @Autowired
     private BlogPostRepository blogPostRepository;
 
-    // inject the actual operations
-    @Autowired
-    private RedisOperations<String, String> operations;
 
     // inject the template as ListOperations
     @Resource(name="redisTemplate")

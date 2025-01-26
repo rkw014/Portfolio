@@ -11,8 +11,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.reactive.UrlBasedCorsConfigurationSource;
 import org.springframework.web.cors.reactive.CorsConfigurationSource;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 @Configuration
@@ -30,6 +28,7 @@ public class SecurityConfig {
         http.authorizeExchange((exchanges) ->
             exchanges
                     .pathMatchers(HttpMethod.OPTIONS).permitAll()
+                    .pathMatchers(HttpMethod.GET, "/api/blogs/presign").authenticated()
                     .pathMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
                     .pathMatchers("/api/users/**").authenticated()
                     .pathMatchers(HttpMethod.POST, "/api/blogs/**").authenticated()

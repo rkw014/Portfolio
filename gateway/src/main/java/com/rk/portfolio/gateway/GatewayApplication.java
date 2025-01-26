@@ -35,6 +35,7 @@ public class GatewayApplication {
 				.path("/api/blogs/**")
 				.filters(f -> f
 					.filter(new RateLimiterFilter())
+					.filter(new BlogGatewayFilter())
 				)
 				// The blog service is private, but available at this internal URL
 				.uri("http://localhost:6200")
