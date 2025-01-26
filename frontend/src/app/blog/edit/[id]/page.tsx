@@ -37,6 +37,8 @@ export default function EditBlogPage() {
   }, [auth, router]);
 
   if (!auth.isAuthenticated) return null;
+  // The rest part is still present in js file transfered to client,
+  // no matter the user is authenticated or not.
 
   useEffect(() => {
     if (!id) return;

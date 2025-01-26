@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,15 +63,16 @@ public class BlogController {
 
     /**
      * Returns a pre-signed URL for the frontend to directly upload an image to S3.
+     * 
+     * Requests to this endpoint has been validated through gateway's cognito:groups validatioin
      *
      * @param filename name of the file user wants to upload
      */
-//    @GetMapping("/presign")
-//    @Transactional
-//    public ResponseEntity<String> presignUpload(@RequestParam String filename) {
-//        // Best practice: Generate unique object keys if needed, e.g., with a user ID or timestamp
-//        String objectKey = "uploads/blog-images/" + filename;
-//        URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
-//        return ResponseEntity.ok(presignedUrl.toString());
-//    }
+   @GetMapping("/presign")
+   public ResponseEntity<String> presignUpload(@RequestParam String filename) {
+        // Best practice: Generate unique object keys if needed, e.g., with a user ID or timestamp
+        String objectKey = "uploads/blog-images/" + filename;
+        URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
+        return ResponseEntity.ok(presignedUrl.toString());
+   }
 }
