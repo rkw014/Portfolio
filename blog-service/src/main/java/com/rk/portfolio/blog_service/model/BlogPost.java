@@ -16,7 +16,11 @@ import java.io.Serializable;
 @AllArgsConstructor
 public class BlogPost implements Serializable {
     @Serial
+    @JsonIgnore
     private static final long serialVersionUID = 10L;
+    
+    @JsonIgnore
+    public static final BlogPost emptyPost = new BlogPost();
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
