@@ -6,6 +6,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import axios from 'axios';
 import { BlogPost } from '@/types/BlogPost';
+import { useAuth } from 'react-oidc-context';
 
 export default function BlogList() {
   const [posts, setPosts] = useState<Array<BlogPost> | null>(null);
@@ -22,11 +23,13 @@ export default function BlogList() {
     fetchData();
   }, []);
 
+  const auth = useAuth();
+  const token = auth.user?.access_token || "";
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
       <h1>Blog Posts</h1>
-      <Link href={"/blog/create"}>New Post</Link>
+      {token ? <Link href={"/blog/create"}>New Post</Link> : null}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {posts && posts.map((post) => {
           if (!post.published) return;

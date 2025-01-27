@@ -29,11 +29,11 @@ public class SecurityConfig {
             exchanges
                     .pathMatchers(HttpMethod.OPTIONS).permitAll()
                     .pathMatchers(HttpMethod.GET, "/api/blogs/presign").authenticated()
-                    .pathMatchers(HttpMethod.GET, "/api/blogs/**").permitAll()
-                    .pathMatchers("/api/users/**").authenticated()
+                    .pathMatchers(HttpMethod.GET, "/api/blogs/*").permitAll()
                     .pathMatchers(HttpMethod.POST, "/api/blogs/**").authenticated()
                     .pathMatchers(HttpMethod.PUT, "/api/blogs/**").authenticated()
                     .pathMatchers(HttpMethod.DELETE, "/api/blogs/**").authenticated()
+                    .pathMatchers("/api/users/**").authenticated()
                     .anyExchange()
                     .denyAll()
         );

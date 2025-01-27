@@ -1,9 +1,11 @@
 package com.rk.portfolio.blog_service.controller;
 
+import com.rk.portfolio.blog_service.dto.PresignedResp;
 import com.rk.portfolio.blog_service.model.BlogPost;
 import com.rk.portfolio.blog_service.service.BlogService;
 import com.rk.portfolio.blog_service.service.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +23,13 @@ public class BlogController {
 
     @Autowired
     private S3Service s3Service;
+
+    @Value("${aws.s3.bucket}")
+    private String bucketName;
+
+    @Value("${cloud.aws.region}")
+    private String bucketRegion;
+    
 
     @GetMapping
     public ResponseEntity<String> test() {
@@ -69,10 +78,16 @@ public class BlogController {
      * @param filename name of the file user wants to upload
      */
    @GetMapping("/presign")
-   public ResponseEntity<String> presignUpload(@RequestParam String filename) {
+   public ResponseEntity<PresignedResp> presignUpload(@RequestParam String filename) {
         // Best practice: Generate unique object keys if needed, e.g., with a user ID or timestamp
         String objectKey = "uploads/blog-images/" + filename;
         URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
-        return ResponseEntity.ok(presignedUrl.toString());
+        String downloadUrl = "https://" + bucketName + ".s3." 
+            + bucketRegion + ".amazonaws.com/" + objectKey;
+        return ResponseEntity.ok(
+            new PresignedResp(
+                presignedUrl.toString(), 
+                downloadUrl
+            ));
    }
 }

@@ -1,7 +1,7 @@
 // app/blog/edit/[id]/page.tsx
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter, useParams } from "next/navigation";
 import { useAuth } from "react-oidc-context";
@@ -10,15 +10,93 @@ import axios from "axios";
 import '@/components/quill.snow.css';
 import { BlogPost } from "../../../../types/BlogPost";
 
-const ReactQuill = dynamic(() => import("react-quill-new"), { 
-  ssr: false,
-  loading: ()=><p>Loading Quill ...</p>
- });
+const ReactQuill = dynamic(async () => {
+  const {default: RQ} =  await import("react-quill-new");
+  return ({ forwardedRef, ...props}) => <RQ ref={forwardedRef} {...props} />;
+}, { ssr: false });
 
 export default function EditBlogPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id;
+
+  
+  const quillRef = useRef(null);
+
+  const handleImage = async () => {
+    const input = document.createElement('input');
+    input.setAttribute('type', 'file');
+    input.setAttribute('accept', 'image/*');
+    input.click();
+
+    input.onchange = async () => {
+      if (!input.files) { return; }
+
+      const file = input.files[0];
+      if (file) {
+        try {
+          // 请求后端获取预签名 URL
+          
+          const res = await axios.get(
+            `${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/presign`, 
+            {
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+            params: {
+              filename: file.name,
+            }
+          });
+
+          if (res.statusText === "OK") {
+            const { presignedUrl, publicUrl } = res.data;
+
+            // 使用预签名 URL 上传图片
+            const uploadResponse = await axios.put(
+              presignedUrl, 
+              file,
+              {
+                headers:{
+                  "Content-Type": file.type,
+                }
+              }
+            );
+
+            if (uploadResponse.statusText === "OK") {
+              // 插入图片到编辑器
+              if (!quillRef.current) {return;}
+              const editor = quillRef.current.getEditor();
+              const range = editor.getSelection();
+              editor.insertEmbed(range.index, 'image', publicUrl);
+            } else {
+              alert('Failed to upload image');
+            }
+          } else {
+            alert('Failed to fetch Presigned Url');
+          }
+        } catch (error) {
+          console.error('Error uploading image:', error);
+          alert('Error uploading image');
+        }
+      }
+    };
+  }
+  
+  const module = useMemo( () => 
+    { return {
+        "toolbar": {
+          "container": [
+            [{ header: [1, 2, false] }],
+            ['bold', 'italic', 'underline'],
+            ['image', 'code-block'],
+          ],
+          "handlers": {
+            image: handleImage,
+          }
+        }
+      }
+    }
+    , []);
 
   const [post, setPost] = useState<BlogPost | null>(null);
   const [altered, setAlter] = useState<number>(0);
@@ -111,30 +189,10 @@ export default function EditBlogPage() {
         <label>Content:</label>
         <ReactQuill
           theme="snow"
+          forwardedRef={quillRef}
           value={post.contentMarkdown}
           onChange={(val) => {setAltered(); setPost({ ...post, contentMarkdown: val });}}
-          modules={{
-            toolbar: [
-                [{ header: [1, 2, false] }],
-                ['bold', 'italic', 'underline'],
-                ['image', 'code-block'],
-              ]
-          }}
-          // formats={[
-          //   "headers",
-          //   "font",
-          //   "size",
-          //   "bold",
-          //   "italic",
-          //   "underline",
-          //   "strike",
-          //   "blockquote",
-          //   "list",
-          //   "bullet",
-          //   "indent",
-          //   "link",
-          //   "image",
-          // ]}
+          modules={module}
           placeholder="Start to type your blog"
         />
       </div>

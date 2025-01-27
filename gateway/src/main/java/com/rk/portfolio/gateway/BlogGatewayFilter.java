@@ -4,12 +4,14 @@ import java.util.List;
 
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.server.ServerWebExchange;
+
 
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
@@ -18,12 +20,20 @@ import reactor.core.publisher.Mono;
 public class BlogGatewayFilter implements GatewayFilter {
   @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        
+        String path = exchange.getRequest().getPath().value();
+        HttpMethod method = exchange.getRequest().getMethod();
+
+        // Skip all request that is not getting presigned url
+        if (!(HttpMethod.GET == method && "/api/blogs/presign".equals(path))) {
+            return chain.filter(exchange);
+        }
 
         return ReactiveSecurityContextHolder.getContext()
             .flatMap(securityContext -> {
                 Authentication authentication = securityContext.getAuthentication();
 
-                if (authentication instanceof JwtAuthenticationToken) {
+                if (authentication instanceof JwtAuthenticationToken ) {
                     Jwt jwt = ((JwtAuthenticationToken) authentication).getToken();
                     // Cognito 通常会把用户组放在 "cognito:groups" 字段中
                     List<String> groups = jwt.getClaimAsStringList("cognito:groups");
@@ -36,7 +46,7 @@ public class BlogGatewayFilter implements GatewayFilter {
                     return chain.filter(exchange);
                 }
 
-                exchange.getResponse().setStatusCode(HttpStatus.UNAUTHORIZED);
+                exchange.getResponse().setStatusCode(HttpStatus.FORBIDDEN);
                 return exchange.getResponse().setComplete();
             });
 
