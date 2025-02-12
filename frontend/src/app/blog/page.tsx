@@ -28,8 +28,8 @@ export default function BlogList() {
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      <h1>Blog Posts</h1>
-      {token ? <Link href={"/blog/create"}>New Post</Link> : null}
+      {token ? 
+        <Link href={"/blog/create"}>New Post</Link> : null}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {posts && posts.map((post) => {
           if (!post.published) return;
