@@ -9,6 +9,7 @@ import axios from "axios";
 import '@/components/quill.snow.css';
 import { useAuth } from "react-oidc-context";
 import Link from "next/link";
+import Image from "next/image";
 
 type BlogPost = {
   id: number;
@@ -60,7 +61,7 @@ export default function BlogDetailPage() {
       <Link href={"/blog"}>Blogs</Link>
       <h1>{post.title}</h1>
       {post.coverImageUrl && (
-        <img
+        <Image
           src={post.coverImageUrl}
           alt="cover"
           style={{ maxWidth: "100%", margin: "16px 0" }}
@@ -80,6 +81,7 @@ export default function BlogDetailPage() {
       </div>
       {auth.user ? (
         <button onClick={handleEdit}>Edit</button>
+        // <button onClick={handleEdit}>Edit</button>
       ) : null }
     </div>
   );
