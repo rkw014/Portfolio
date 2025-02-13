@@ -1,4 +1,4 @@
-
+import Auth from "../components/Auth"
 
 export default function Footer() {
   return (
@@ -9,12 +9,13 @@ export default function Footer() {
           <a href="mailto:wangrk197@gmail.com" className="hover:text-white">
             Email
           </a>
-          <a href="#" className="hover:text-white">
+          <a href="https://linkedin.com/in/ruikun-wang-su" className="hover:text-white">
             LinkedIn
           </a>
           <a href="https://github.com/rkw014" className="hover:text-white">
             GitHub
           </a>
+          <Auth/>
         </div>
       </div>
     </footer>
