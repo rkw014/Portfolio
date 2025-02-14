@@ -79,7 +79,7 @@ export default function BlogDetailPage() {
       <div style={{ marginTop: 12 }}>
         Published: {post.published ? "Yes" : "No"}
       </div>
-      {auth.user ? (
+      {auth.isAuthenticated ? (
         <button onClick={handleEdit}>Edit</button>
         // <button onClick={handleEdit}>Edit</button>
       ) : null }

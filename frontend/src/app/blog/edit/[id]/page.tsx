@@ -82,7 +82,7 @@ export default function EditBlogPage() {
     };
   }
   
-  const module = useMemo( () => 
+  const mod = useMemo( () => 
     { return {
         "toolbar": {
           "container": [
@@ -114,9 +114,9 @@ export default function EditBlogPage() {
     }
   }, [auth, router]);
 
-  if (!auth.isAuthenticated) return null;
-  // The rest part is still present in js file transfered to client,
-  // no matter the user is authenticated or not.
+  if (!auth.isAuthenticated) {
+    return <div>Not Authorized!</div>;
+  }
 
   useEffect(() => {
     if (!id) return;
@@ -192,7 +192,7 @@ export default function EditBlogPage() {
           forwardedRef={quillRef}
           value={post.contentMarkdown}
           onChange={(val) => {setAltered(); setPost({ ...post, contentMarkdown: val });}}
-          modules={module}
+          modules={mod}
           placeholder="Start to type your blog"
         />
       </div>
