@@ -5,6 +5,7 @@ import { faGithub, faLinkedin  } from '@fortawesome/free-brands-svg-icons'
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
 import { CSSProperties } from "react";
+import ContactForm from "@/components/ContactForm";
 
 const background_shape_css:CSSProperties  = {
   position: "absolute",
@@ -74,6 +75,7 @@ export default function Home() {
         <p className="text-gray-700 mb-4">
         My passion for computer science began in the fifth grade and has grown through coursework and hands-on projects. Continually exploring new technologies is a core part of my personal philosophy.
         </p>
+        <Link href={'#'} className="inline-block bg-blue-600 text-white font-bold px-4 py-2 rounded-xl">Download CV</Link>
       </div>
 
       <div id="projects" className="py-10 px-10 my-6 bg-neutral-100 rounded-3xl">
@@ -82,8 +84,8 @@ export default function Home() {
       </div>
 
       <div id="contact" className="py-10 px-10 my-6 bg-neutral-100 rounded-3xl">
-        <h3 className="text-3xl font-bold mb-4">Get In Touch</h3>
-        {/* ...表单 */}
+        <h3 className="text-3xl font-bold mb-4">Get in Touch</h3>
+        <ContactForm />
       </div>
     </section>
   )
