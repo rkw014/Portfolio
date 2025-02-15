@@ -3,32 +3,9 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import formData from "form-data";
 import Mailgun from "mailgun.js";
-import { rateLimit } from 'express-rate-limit'
-import Redis from "ioredis";
-import { RedisStore } from 'rate-limit-redis'
-import { runMiddleware } from "@/lib/runMiddleware";
+import { getIp } from "@/lib/getIp";
+import { rateLimiter } from "@/lib/rateLimiter";
 
-// Initialize Redis client using the REDIS_URL environment variable
-const redis = new Redis(process.env.REDIS_URL || "redis://localhost:6379/1");
-
-// Create a RedisStore instance
-// https://www.npmjs.com/package/rate-limit-redis
-const redisStore = new RedisStore({
-  // @ts-expect-error - Known issue: the `call` function is not present in @types/ioredis
-  sendCommand: (...args: string[]) => redis.call(...args),
-});
-
-const limiter = rateLimit({
-  // Rate limiter configuration
-  windowMs: 10 * 60 * 1000, // 10 minutes
-  max: 10, // Limit each IP to 10 requests per `window` (here, per 10 minutes)
-  standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
-  legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-  store: redisStore,
-  // handler: (req, res) => {
-  //   res.status(429).json({ error: "Too many requests, please try again later." });
-  // },
-});
 
 const mailgun = new Mailgun(formData);
 const mg = mailgun.client({
@@ -37,13 +14,17 @@ const mg = mailgun.client({
 });
 
 export async function POST(req: NextRequest) {
-  // try {
-  //   // Run the rate limiter middleware
-  //   await runMiddleware(req, limiter);
-  // } catch (error) {
-  //   console.error(error);
-  //   return NextResponse.json({ error: "Too many requests" }, { status: 400 });
-  // }
+  try {
+    // Run the rate limiter middleware
+    const clientIp = getIp(req);
+    const r = await rateLimiter(clientIp);
+    if (!r.success){
+      return NextResponse.json({ error: "Too many requests" }, { status: 400 });
+    }
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json({ error: "Too many requests" }, { status: 400 });
+  }
 
   try {
     // Parse JSON body expecting: name, email, message, and a honeypot field 'hp'
