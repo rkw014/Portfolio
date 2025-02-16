@@ -12,6 +12,7 @@ import { BlogPost } from "../../../../types/BlogPost";
 
 const ReactQuill = dynamic(async () => {
   const {default: RQ} =  await import("react-quill-new");
+  // eslint-disable-next-line react/display-name
   return ({ forwardedRef, ...props}) => <RQ ref={forwardedRef} {...props} />;
 }, { ssr: false });
 
@@ -109,14 +110,10 @@ export default function EditBlogPage() {
   const token = auth.user?.access_token || "";
   useEffect(()=>{
     if(!auth.isLoading && !auth.isAuthenticated){
-      alert("You don't have permission to edit posts.");
       router.replace(`/blog/${id}`);
     }
-  }, [auth, router]);
+  }, [auth, router, id]);
 
-  if (!auth.isAuthenticated) {
-    return <div>Not Authorized!</div>;
-  }
 
   useEffect(() => {
     if (!id) return;
@@ -134,7 +131,7 @@ export default function EditBlogPage() {
   const handleUpdate = async () => {
     if (!post) return;
     try {
-      const res = await axios.put(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${post.id}`, post, {
+      await axios.put(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${post.id}`, post, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -155,11 +152,9 @@ export default function EditBlogPage() {
     router.push(`/blog/${post.id}`);
   };
 
-  if (!post) {
-    return <div>Loading post...</div>;
-  }
-
-  return (
+  return !post ? <div>Loading post...</div> : 
+          !auth.isAuthenticated ? <div>Not Authorized!</div> : 
+      (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <h1>Edit Blog Post</h1>
       <label>Title:</label>

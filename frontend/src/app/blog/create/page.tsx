@@ -13,6 +13,7 @@ import '@/components/quill.snow.css';
 // https://stackoverflow.com/questions/60458247/how-to-access-reactquill-ref-when-using-dynamic-import-in-nextjs
 const ReactQuill = dynamic(async () => {
   const {default: RQ} =  await import("react-quill-new");
+  // eslint-disable-next-line react/display-name
   return ({ forwardedRef, ...props}) => <RQ ref={forwardedRef} {...props} />;
 }, { ssr: false });
 
@@ -90,7 +91,7 @@ export default function CreateBlogPage() {
     };
   }
 
-  const module = useMemo( () => 
+  const RQmodule = useMemo( () => 
     { return {
         "toolbar": {
           "container": [
@@ -111,7 +112,6 @@ export default function CreateBlogPage() {
   const token = auth.user?.access_token || "";
   useEffect(()=>{
     if(!auth.isLoading && !auth.isAuthenticated){
-      alert("You don't have permission to edit posts.");
       router.replace(`/blog`);
     }
   }, [auth, router]);
@@ -151,7 +151,7 @@ export default function CreateBlogPage() {
     router.push(`/blog`);
   };
 
-  return (
+  return !auth.isAuthenticated ? <div>Not Authorized!</div> : (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
       <h1>Create a New Blog Post</h1>
       <label>Title:</label>
@@ -184,7 +184,7 @@ export default function CreateBlogPage() {
             theme="snow" 
             value={content} 
             onChange={(v)=>{setAltered(); setContent(v)}} 
-            modules={module}
+            modules={RQmodule}
           />
 
       </div>

@@ -36,13 +36,10 @@ export default function BlogDetailPage() {
         if (res.status === 200) {
           setPost(res.data);
         }
-      } catch (err: any) {
+      } catch (err: unknown) {
         console.error("Error fetching post:", err);
-        // If the post doesn't exist, you might redirect or show a 404 message
-        if (err?.response?.status === 404) {
-          alert("This blog post does not exist.");
-          router.push("/blog");
-        }
+        alert("This blog post does not exist.");
+        router.push("/blog");
       }
     };
     fetchData();

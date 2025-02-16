@@ -24,11 +24,10 @@ export default function BlogList() {
   }, []);
 
   const auth = useAuth();
-  const token = auth.user?.access_token || "";
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      {token ? 
+      {auth.isAuthenticated ? 
         <Link href={"/blog/create"}>New Post</Link> : null}
       <ul style={{ listStyle: 'none', padding: 0 }}>
         {posts && posts.map((post) => {
