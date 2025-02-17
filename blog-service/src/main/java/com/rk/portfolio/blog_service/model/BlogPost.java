@@ -29,7 +29,7 @@ public class BlogPost implements Serializable {
     private String title;
 
     @Column(columnDefinition = "TEXT")
-    private String contentMarkdown; // store markdown
+    private String contentMarkdown; 
 
     // reference an S3 URL or object key
     private String coverImageUrl;

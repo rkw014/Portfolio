@@ -40,6 +40,18 @@ public class GatewayApplication {
 				// The blog service is private, but available at this internal URL
 				.uri("http://localhost:6200")
 			)
+			// ==========================
+			// 3. Project Service Route
+			// ==========================
+			.route("project-service-route", r -> r
+				.path("/api/projects/**")
+				.filters(f -> f
+					.filter(new RateLimiterFilter())
+					.filter(new BlogGatewayFilter())
+				)
+				// The blog service is private, but available at this internal URL
+				.uri("http://localhost:6200")
+			)
 			.build();
 	}
 

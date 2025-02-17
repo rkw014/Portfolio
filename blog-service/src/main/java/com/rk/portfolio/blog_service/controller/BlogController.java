@@ -13,7 +13,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Optional;
 
-
 @RestController
 @RequestMapping("/api/blogs")
 public class BlogController {
@@ -29,7 +28,6 @@ public class BlogController {
 
     @Value("${cloud.aws.region}")
     private String bucketRegion;
-    
 
     @GetMapping
     public ResponseEntity<String> test() {
@@ -45,7 +43,7 @@ public class BlogController {
     @PutMapping("/{id}")
     public ResponseEntity<BlogPost> updatePost(@PathVariable Long id, @RequestBody BlogPost updated) {
         BlogPost saved = blogService.update(id, updated);
-        if(saved == null){
+        if (saved == null) {
             return ResponseEntity.notFound().build();
         }
         return ResponseEntity.ok(saved);
@@ -73,21 +71,22 @@ public class BlogController {
     /**
      * Returns a pre-signed URL for the frontend to directly upload an image to S3.
      * 
-     * Requests to this endpoint has been validated through gateway's cognito:groups validatioin
+     * Requests to this endpoint has been validated through gateway's cognito:groups
+     * validatioin
      *
      * @param filename name of the file user wants to upload
      */
-   @GetMapping("/presign")
-   public ResponseEntity<PresignedResp> presignUpload(@RequestParam String filename) {
-        // Best practice: Generate unique object keys if needed, e.g., with a user ID or timestamp
+    @GetMapping("/presign")
+    public ResponseEntity<PresignedResp> presignUpload(@RequestParam String filename) {
+        // Best practice: Generate unique object keys if needed, e.g., with a user ID or
+        // timestamp
         String objectKey = "uploads/blog-images/" + filename;
         URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
-        String downloadUrl = "https://" + bucketName + ".s3." 
-            + bucketRegion + ".amazonaws.com/" + objectKey;
+        String downloadUrl = "https://" + bucketName + ".s3."
+                + bucketRegion + ".amazonaws.com/" + objectKey;
         return ResponseEntity.ok(
-            new PresignedResp(
-                presignedUrl.toString(), 
-                downloadUrl
-            ));
-   }
+                new PresignedResp(
+                        presignedUrl.toString(),
+                        downloadUrl));
+    }
 }

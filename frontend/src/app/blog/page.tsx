@@ -1,4 +1,3 @@
-// pages/blog/index.js
 "use client";
 
 import React, { useEffect, useState } from 'react';

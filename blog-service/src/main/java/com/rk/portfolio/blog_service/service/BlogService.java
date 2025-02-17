@@ -17,21 +17,15 @@ import java.util.Optional;
 @Slf4j
 public class BlogService {
 
-    private static final String blogHashKey = "PortfolioBlogs";
+    private static final String blogHashKey = "PortfolioBlogs:";
 
     @Autowired
     private BlogPostRepository blogPostRepository;
-
-
-    // // inject the template as ListOperations
-    // @Resource(name="redisTemplate")
-    // private HashOperations<String, String, List<BlogPost>> hashOps;
 
     @Autowired
     private RedisTemplate<String, Object> template;
 
     @Transactional
-    // @CachePut(value = "blog", key = "#result.id")
     public BlogPost save(BlogPost blogPost) {
         BlogPost saved = blogPostRepository.save(blogPost);
         template.delete(getRedisKey("posts"));
@@ -40,10 +34,9 @@ public class BlogService {
     }
 
     @Transactional
-    // @CachePut(value = "blog", key = "#result.id")
-    public BlogPost update(Long id, BlogPost updated){
+    public BlogPost update(Long id, BlogPost updated) {
         Optional<BlogPost> prevPost = blogPostRepository.findById(id);
-        if(prevPost.isEmpty() ){
+        if (prevPost.isEmpty()) {
             return null;
         }
         BlogPost pPost = prevPost.get();
@@ -57,28 +50,27 @@ public class BlogService {
         return saved;
     }
 
-    // @Cacheable(value = "blog", key = "#id")
     public Optional<BlogPost> findById(Long id) {
         log.debug(id.toString());
         BlogPost post = (BlogPost) template.opsForValue().get(getRedisKey(id));
-        if (post == null){
+        if (post == null) {
             Optional<BlogPost> postDB = blogPostRepository.findById(id);
-            if (postDB.isPresent()){
+            if (postDB.isPresent()) {
                 template.opsForValue().set(getRedisKey(id), postDB.get());
                 return postDB;
-            }else{
+            } else {
                 template.opsForValue().set(getRedisKey(id), BlogPost.emptyPost);
                 return Optional.empty();
             }
-        }else if (post == BlogPost.emptyPost){
+        } else if (post == BlogPost.emptyPost) {
             return Optional.empty();
         }
         return Optional.of(post);
     }
 
     public List<BlogPost> findAll() {
-        List<BlogPost> posts = (List<BlogPost>) template.opsForValue().get(getRedisKey("posts") );
-        if (posts == null || posts.size() == 0){
+        List<BlogPost> posts = (List<BlogPost>) template.opsForValue().get(getRedisKey("posts"));
+        if (posts == null || posts.size() == 0) {
             List<BlogPost> postsDB = blogPostRepository.findAll();
             template.opsForValue().set(getRedisKey("posts"), postsDB);
             posts = postsDB;
@@ -87,17 +79,17 @@ public class BlogService {
     }
 
     @Transactional
-    // @CacheEvict(value = "blog", key = "#id")
     public void delete(Long id) {
         blogPostRepository.deleteById(id);
         template.delete(getRedisKey("posts"));
         template.delete(getRedisKey(id));
     }
 
-    private String getRedisKey(String val){
+    private String getRedisKey(String val) {
         return blogHashKey + val;
     }
-    private String getRedisKey(Long id){
+
+    private String getRedisKey(Long id) {
         return blogHashKey + id.toString();
     }
 }

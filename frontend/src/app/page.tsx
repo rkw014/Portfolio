@@ -1,17 +1,17 @@
+"use client";
 import Image from "next/image";
 import profilePic from '../../public/profile.jpg';
-import polyglotbotPic from '../../public/polyglotbot.png';
-import gcodePic from '../../public/gcode.png';
-import portfolioPic from '../../public/portfolio.png';
 import questionmarkPic from '../../public/question_mark.png';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faGithub, faLinkedin } from '@fortawesome/free-brands-svg-icons';
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
 import Link from "next/link";
-import { CSSProperties } from "react";
+import { CSSProperties, useEffect, useState } from "react";
 import ContactForm from "@/components/ContactForm";
 import ProjectCard from "@/components/ProjectCard";
 import { Project } from "@/types/Project";
+import { useAuth } from "react-oidc-context";
+import axios from "axios";
 
 const background_shape_css: CSSProperties = {
   position: "absolute",
@@ -29,59 +29,39 @@ const section_css: CSSProperties = {
   backgroundColor: "#fbfaf9",
 }
 
-// temporary
 export default function Home() {
 
-  const projects: Project[] = [
-    {
-      id: "1df7b473-13b0-47d0-b75b-3d684ccd684b",
-      title: "GCode Codepad",
-      year: "Jan 2022 - Present",
-      imgUrl: gcodePic,
-      description: "A scalable Spring Boot microservice backend for an online collaborative code editor with integrated video calling.",
-      content: "",
-      category: "Full Stack",
-      link: "https://github.com/GCode-codepad/backend",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "321c3619-0802-44a5-bda8-75a6372ce206",
-      title: "Portfolio and Blog System",
-      year: "Dec 2024 - Present",
-      imgUrl: portfolioPic,
-      description: "A single-page application (SPA) personal blog with Cognito, Spring Boot, S3, and a WYSIWYG editor.",
-      content: "",
-      link: "https://github.com/rkw014/Portfolio",
-      category: "Full Stack",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "af34462f-f3ca-4f81-91ee-0a34a9547f2d",
-      title: "PolyglotBot",
-      year: "March 2024 - April 2024",
-      imgUrl: polyglotbotPic,
-      description: "A psersonalized English chat tutor with OpenAI. Augmented with AWS ECS, K8s, Kafka, Circuit Breaker ...",
-      content: "",
-      link: "github.com/PolyglotBot-Alpha/PolyglotBot",
-      category: "Full Stack",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-    {
-      id: "3af35181-6de5-4418-b4ad-086f6af858c1",
-      title: "More to Come...",
-      year: "...",
-      imgUrl: questionmarkPic,
-      description: "Awesom Project beeing made",
-      content: "",
-      link: "#",
-      category: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    },
-  ];
+  const futureProject: Project =
+  {
+    id: "3af35181-6de5-4418-b4ad-086f6af858c1",
+    title: "More to Come...",
+    year: "...",
+    imgUrl: questionmarkPic,
+    description: "Awesom Project beeing made",
+    content: "",
+    link: "#",
+    category: "",
+    published: true,
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  };
+
+
+  const auth = useAuth();
+  const [projects, setProjects] = useState<Array<Project> | null>(null);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/projects/all`);
+        setProjects(res.data);
+      } catch (err) {
+        console.error("Error fetching projects posts:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
 
   return (
     <section>
@@ -142,18 +122,17 @@ export default function Home() {
       </div>
 
       <div id="projects" className="py-10 px-10 my-6 rounded-3xl shadow-lg" style={section_css}>
-        <h3 className="text-3xl font-bold mb-4">Projects</h3>
+        <div className="flex flex-row justify-between">
+          <h3 className="text-3xl font-bold mb-4">Projects</h3>
+          <Link href={"/project/create"} className="text-3xl font-bold mb-4">+</Link>
+        </div>
         <div className="overflow-x-auto py-6">
           <div className="flex space-x-6 px-4 snap-x snap-mandatory">
-            {projects.map((project) => (
-              <Link 
-                href={project.link} 
-                target={project.link === "#"? undefined: "_blank"} 
-                key={project.id} 
-                className="flex-shrink-0 w-80">
-                <ProjectCard project={project} />
-              </Link>
+            {projects && projects.map((project) => (
+              <ProjectCard key={project.id} project={project} />
             ))}
+
+            <ProjectCard project={futureProject} />
           </div>
         </div>
       </div>

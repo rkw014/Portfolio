@@ -19,7 +19,7 @@ public class S3Service {
     @Value("${aws.s3.bucket}")
     private String bucketName;
 
-   public URL generatePresignedUploadUrl(String objectKey) {
+    public URL generatePresignedUploadUrl(String objectKey) {
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
                 .key(objectKey)
@@ -31,6 +31,6 @@ public class S3Service {
                 .build();
 
         return s3Presigner.presignPutObject(presignRequest).url();
-       
-   }
+
+    }
 }
