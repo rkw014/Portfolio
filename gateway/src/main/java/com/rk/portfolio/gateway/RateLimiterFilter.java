@@ -38,7 +38,9 @@ public class RateLimiterFilter implements GatewayFilter {
 
         // public accessble blogs
         RequestPath path = exchange.getRequest().getPath();
-        if (path.toString().startsWith("/api/blogs") && method == HttpMethod.GET) {
+        if ((path.toString().startsWith("/api/blogs") ||
+            path.toString().startsWith("/api/projects")
+            ) && method == HttpMethod.GET) {
             return chain.filter(exchange);
         }
 

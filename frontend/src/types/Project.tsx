@@ -9,6 +9,7 @@ export type Project = {
   description: string;
   content: string;
   category: string;
+  published: boolean;
   createdAt: Date;
   updatedAt: Date;
 }
