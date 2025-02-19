@@ -1,3 +1,4 @@
+"use server";
 import Redis from 'ioredis';
 
 // Initialize Redis client using the REDIS_URL environment variable

@@ -6,7 +6,7 @@ import { useParams, useRouter } from "next/navigation";
 import axios from "axios";
 
 
-import '@/components/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
 import { useAuth } from "react-oidc-context";
 import Link from "next/link";
 import Image from "next/image";

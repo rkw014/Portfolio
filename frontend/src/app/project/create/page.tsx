@@ -5,15 +5,22 @@ import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
+import ReactQuill from "react-quill-new";
 
-import '@/components/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
+import { editorProps } from "@/types/EditorProps";
+
 
 // Dynamically import react-quill to avoid SSR issues
 // https://stackoverflow.com/questions/60458247/how-to-access-reactquill-ref-when-using-dynamic-import-in-nextjs
-const ReactQuill = dynamic(async () => {
+const Editor = dynamic(async () => {
   const { default: RQ } = await import("react-quill-new");
-  // eslint-disable-next-line react/display-name
-  return ({ forwardedRef, ...props }) => <RQ ref={forwardedRef} {...props} />;
+  // RQ.Quill.debug("info");
+  const comp = (
+    { ref, ...props }: editorProps
+  ) => <RQ ref={ref} {...props} />;
+  return comp;
+
 }, { ssr: false });
 
 
@@ -28,7 +35,7 @@ export default function CreateProjectPage() {
   const [published, setPublished] = useState(false);
   const router = useRouter();
 
-  const quillRef = useRef(null);
+  const quillRef = useRef<ReactQuill>(null);
 
   const [altered, setAlter] = useState<number>(0);
   const setAltered = () => {
@@ -43,9 +50,8 @@ export default function CreateProjectPage() {
     if (!auth.isLoading && !auth.isAuthenticated) {
       router.replace(`/`);
     }
-    if (auth.isAuthenticated){
+    if (auth.isAuthenticated) {
       setToken(auth.user?.access_token || "");
-      console.log(auth.user?.access_token);
     }
   }, [auth, router]);
 
@@ -63,7 +69,6 @@ export default function CreateProjectPage() {
       if (file) {
         try {
           // 请求后端获取预签名 URL
-          console.log(token);
           const res = await axios.get(
             `${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/presign`,
             {
@@ -75,7 +80,7 @@ export default function CreateProjectPage() {
               }
             });
 
-          if (res.statusText === "OK") {
+          if (res.status === 200) {
             const { presignedUrl, publicUrl } = res.data;
 
             // 使用预签名 URL 上传图片
@@ -89,11 +94,12 @@ export default function CreateProjectPage() {
               }
             );
 
-            if (uploadResponse.statusText === "OK") {
+            if (uploadResponse.status === 200) {
               // 插入图片到编辑器
-              if (!quillRef.current) { return; }
+              if (!quillRef.current) return;
               const editor = quillRef.current.getEditor();
               const range = editor.getSelection();
+              if (!range) return;
               editor.insertEmbed(range.index, 'image', publicUrl);
             } else {
               alert('Failed to upload image');
@@ -107,7 +113,7 @@ export default function CreateProjectPage() {
         }
       }
     };
-  }, [token])
+  }, [token, quillRef]);
 
   const RQmodule = useMemo(() => {
     return {
@@ -122,10 +128,9 @@ export default function CreateProjectPage() {
         }
       }
     }
-  }
-    , [handleImage]);
+  }, [handleImage]);
 
-  
+
 
   const handleSubmit = async () => {
     if (!title) {
@@ -144,7 +149,7 @@ export default function CreateProjectPage() {
     };
 
     try {
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/projects`, requestBody, {
+      await axios.post(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/projects`, requestBody, {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -163,6 +168,8 @@ export default function CreateProjectPage() {
     }
     router.push(`/`);
   };
+
+  
 
   return !auth.isAuthenticated ? <div>Not Authorized!</div> : (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -213,13 +220,16 @@ export default function CreateProjectPage() {
 
       <div style={{ marginTop: 12 }}>
         <label>Content:</label>
-        <ReactQuill
-          forwardedRef={quillRef}
-          theme="snow"
-          value={content}
-          onChange={(v) => { setAltered(); setContent(v) }}
-          modules={RQmodule}
-        />
+          <Editor
+            key={'quill-editor'}
+            ref={quillRef}
+            theme="snow"
+            value={content}
+            onChange={(v: string) => { 
+              setAltered(); setContent(v) 
+            }}
+            modules={RQmodule}
+          />
 
         <label>Category:</label>
         <input

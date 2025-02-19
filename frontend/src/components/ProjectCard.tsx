@@ -21,7 +21,7 @@ const ProjectCard: FC<Props> = ({ project }) => {
         <div className="relative h-48 w-full">
           <Image
             src={project.imgUrl}
-            alt={project.title}
+            alt={project.title || "Project Image"}
             layout="fill"
             objectFit="cover"
             className="transition-transform duration-300 ease-in-out"

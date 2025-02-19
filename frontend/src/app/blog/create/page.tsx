@@ -1,19 +1,24 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
 
-import '@/components/quill.snow.css';
+import 'react-quill-new/dist/quill.snow.css';
+import { editorProps } from "@/types/EditorProps";
+import ReactQuill from "react-quill-new";
 
 // Dynamically import react-quill to avoid SSR issues
 // https://stackoverflow.com/questions/60458247/how-to-access-reactquill-ref-when-using-dynamic-import-in-nextjs
-const ReactQuill = dynamic(async () => {
-  const {default: RQ} =  await import("react-quill-new");
-  // eslint-disable-next-line react/display-name
-  return ({ forwardedRef, ...props}) => <RQ ref={forwardedRef} {...props} />;
+const Editor = dynamic(async () => {
+  const { default: RQ } = await import("react-quill-new");
+  const comp = (
+    { ref, ...props }: editorProps
+  ) => <RQ ref={ref} {...props} />;
+  return comp;
+
 }, { ssr: false });
 
 export default function CreateBlogPage() {
@@ -23,7 +28,7 @@ export default function CreateBlogPage() {
   const [content, setContent] = useState("");
   const router = useRouter();
 
-  const quillRef = useRef(null);
+  const quillRef = useRef<ReactQuill>(null);
   
   const [altered, setAlter] = useState<number>(0);
   const setAltered = () =>{
@@ -31,7 +36,19 @@ export default function CreateBlogPage() {
     setAlter(altered + 1);
   };
 
-  const handleImage = async () => {
+  // Get token from OIDC context
+    const auth = useAuth();
+    const [token, setToken] = useState("");
+    useEffect(() => {
+      if (!auth.isLoading && !auth.isAuthenticated) {
+        router.replace(`/`);
+      }
+      if (auth.isAuthenticated) {
+        setToken(auth.user?.access_token || "");
+      }
+    }, [auth, router]);
+
+  const handleImage = useCallback( async () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
@@ -56,7 +73,7 @@ export default function CreateBlogPage() {
             }
           });
 
-          if (res.statusText === "OK") {
+          if (res.status === 200) {
             const { presignedUrl, publicUrl } = res.data;
 
             // 使用预签名 URL 上传图片
@@ -70,11 +87,12 @@ export default function CreateBlogPage() {
               }
             );
 
-            if (uploadResponse.statusText === "OK") {
+            if (uploadResponse.status === 200) {
               // 插入图片到编辑器
               if (!quillRef.current) {return;}
               const editor = quillRef.current.getEditor();
               const range = editor.getSelection();
+              if (!range) return;
               editor.insertEmbed(range.index, 'image', publicUrl);
             } else {
               alert('Failed to upload image');
@@ -88,7 +106,7 @@ export default function CreateBlogPage() {
         }
       }
     };
-  }
+  }, [token]);
 
   const RQmodule = useMemo( () => 
     { return {
@@ -104,16 +122,8 @@ export default function CreateBlogPage() {
         }
       }
     }
-    , []);
+    , [handleImage]);
 
-  // Get token from OIDC context
-  const auth = useAuth();
-  const token = auth.user?.access_token || "";
-  useEffect(()=>{
-    if(!auth.isLoading && !auth.isAuthenticated){
-      router.replace(`/blog`);
-    }
-  }, [auth, router]);
 
   if (!auth.isAuthenticated) return null;
 
@@ -178,11 +188,11 @@ export default function CreateBlogPage() {
 
       <div style={{ marginTop: 12 }}>
         <label>Content:</label>
-          <ReactQuill 
-            forwardedRef={quillRef}
+          <Editor 
+            ref={quillRef}
             theme="snow" 
             value={content} 
-            onChange={(v)=>{setAltered(); setContent(v)}} 
+            onChange={(v: string)=>{setAltered(); setContent(v)}} 
             modules={RQmodule}
           />
 
