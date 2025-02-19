@@ -78,12 +78,10 @@ public class BlogController {
      */
     @GetMapping("/presign")
     public ResponseEntity<PresignedResp> presignUpload(@RequestParam String filename) {
-        // Best practice: Generate unique object keys if needed, e.g., with a user ID or
-        // timestamp
         String objectKey = "uploads/blog-images/" + filename;
         URL presignedUrl = s3Service.generatePresignedUploadUrl(objectKey);
-        String downloadUrl = "https://" + bucketName + ".s3."
-                + bucketRegion + ".amazonaws.com/" + objectKey;
+        String downloadUrl = "https://" + bucketName.trim() + ".s3."
+                + bucketRegion.trim() + ".amazonaws.com/" + objectKey;
         return ResponseEntity.ok(
                 new PresignedResp(
                         presignedUrl.toString(),

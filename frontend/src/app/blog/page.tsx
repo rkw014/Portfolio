@@ -38,7 +38,7 @@ export default function BlogList() {
                   {post.coverImageUrl && 
                     <Image
                       src={post.coverImageUrl}
-                      alt={post.title}
+                      alt={post.title || "Blog Image"}
                       width={150}
                       height={100}
                       objectFit="cover"

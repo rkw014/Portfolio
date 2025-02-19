@@ -124,7 +124,8 @@ export default function Home() {
       <div id="projects" className="py-10 px-10 my-6 rounded-3xl shadow-lg" style={section_css}>
         <div className="flex flex-row justify-between">
           <h3 className="text-3xl font-bold mb-4">Projects</h3>
-          <Link href={"/project/create"} className="text-3xl font-bold mb-4">+</Link>
+          {auth.isAuthenticated &&
+            <Link href={"/project/create"} className="text-3xl font-bold mb-4">+</Link>}
         </div>
         <div className="overflow-x-auto py-6">
           <div className="flex space-x-6 px-4 snap-x snap-mandatory">
