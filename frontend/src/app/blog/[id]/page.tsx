@@ -27,15 +27,24 @@ export default function BlogDetailPage() {
   const [post, setPost] = useState<BlogPost | null>(null);
 
   const auth = useAuth();
-  
+
   useEffect(() => {
     if (!id) return;
     const fetchData = async () => {
+      if(auth.isLoading){return;}
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`);
-        if (res.status === 200) {
-          setPost(res.data);
+        let res = null;
+        if (auth.isAuthenticated){
+          res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`,{
+            headers: {
+              Authorization: `Bearer ${auth.user?.access_token}`
+            }
+          });
+        }else{
+          res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`);
         }
+        setPost(res.data);
+
       } catch (err: unknown) {
         console.error("Error fetching post:", err);
         alert("This blog post does not exist.");
@@ -43,9 +52,9 @@ export default function BlogDetailPage() {
       }
     };
     fetchData();
-  }, [id, router]);
+  }, [auth.isAuthenticated, auth.isLoading, auth.user?.access_token, id, router]);
 
-  if (!post) {
+  if (!post || auth.isLoading) {
     return <div>Loading...</div>;
   }
 
@@ -55,15 +64,19 @@ export default function BlogDetailPage() {
 
   return (
     <div style={{ maxWidth: 800, margin: "0 auto" }}>
-      <Link href={"/blog"}>Blogs</Link>
-      <h1>{post.title}</h1>
-      {post.coverImageUrl && (
-        <Image
-          src={post.coverImageUrl}
-          alt="cover"
-          style={{ maxWidth: "100%", margin: "16px 0" }}
-        />
-      )}
+      <Link href={"/blog"} className="">Blogs</Link>
+      <h3 className="text-3xl font-bold mb-4">{post.title}</h3>
+      <div className="relative h-48 w-full mb-4">
+        {post.coverImageUrl && (
+          <Image
+            src={post.coverImageUrl}
+            alt="cover"
+            style={{ maxWidth: "100%", margin: "16px 0" }}
+            layout="fill"
+            objectFit="contain"
+          />
+        )}
+      </div>
 
       {/* If contentMarkdown is HTML, we can render with dangerouslySetInnerHTML */}
       <div className="ql-container ql-snow">
@@ -73,13 +86,14 @@ export default function BlogDetailPage() {
           className="ql-editor"
         />
       </div>
-      <div style={{ marginTop: 12 }}>
+      
+      {auth.isAuthenticated ? <div style={{ marginTop: 12 }}>
         Published: {post.published ? "Yes" : "No"}
-      </div>
+      </div> : null}
+
       {auth.isAuthenticated ? (
         <button onClick={handleEdit}>Edit</button>
-        // <button onClick={handleEdit}>Edit</button>
-      ) : null }
+      ) : null}
     </div>
   );
 }

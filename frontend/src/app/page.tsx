@@ -12,6 +12,8 @@ import ProjectCard from "@/components/ProjectCard";
 import { Project } from "@/types/Project";
 import { useAuth } from "react-oidc-context";
 import axios from "axios";
+import BlogCard from "@/components/BlogCard";
+import { BlogPost } from "@/types/BlogPost";
 
 const background_shape_css: CSSProperties = {
   position: "absolute",
@@ -57,6 +59,31 @@ export default function Home() {
         setProjects(res.data);
       } catch (err) {
         console.error("Error fetching projects posts:", err);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const [posts, setPosts] = useState<Array<BlogPost> | null>(null);
+
+  const placeholderBlog: BlogPost = {
+    id: "#",
+    title: "Awesom Post",
+    coverImageUrl: questionmarkPic,
+    contentMarkdown: "",
+    published: true,
+  }
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(
+          `${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/all`);
+        const publishedBlogs = res.data.filter((blog: BlogPost) => blog.published);
+        const displayedBlogs = publishedBlogs.slice(0, 3);
+        setPosts(displayedBlogs);
+      } catch (err) {
+        console.error("Error fetching blog posts:", err);
       }
     };
     fetchData();
@@ -135,6 +162,24 @@ export default function Home() {
 
             <ProjectCard project={futureProject} />
           </div>
+        </div>
+      </div>
+
+      <div className="py-10 px-10 my-6 rounded-3xl shadow-lg" style={section_css}>
+        <div className="flex flex-row justify-between">
+          <h2 className="text-3xl font-bold mb-4">Blogs</h2>
+          {auth.isAuthenticated &&
+            <Link href={"/blog/create"} className="text-3xl font-bold mb-4">+</Link>}
+        </div>
+        <div className="space-y-6">
+          {posts && posts.length !== 0 ? posts.map((blog) => (
+            <BlogCard key={blog.id} blog={blog} />
+          )) : <BlogCard key={placeholderBlog.id!} blog={placeholderBlog} />}
+        </div>
+        <div className="mt-8 text-center">
+          <Link href="/blog" className="inline-block px-6 py-3 bg-blue-600 text-white font-semibold rounded hover:bg-blue-700 transition">
+            More Blogs
+          </Link>
         </div>
       </div>
 
