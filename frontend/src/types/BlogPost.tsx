@@ -1,9 +1,12 @@
 
 "use client";
+
+import { StaticImageData } from "next/image";
+
 export type BlogPost = {
-  id?: number;
+  id?: number | string;
   title?: string;
-  coverImageUrl?: string;
+  coverImageUrl?: string | StaticImageData;
   contentMarkdown?: string;
   published?: boolean;
 };

@@ -2,59 +2,75 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
-import Image from 'next/image';
 import axios from 'axios';
 import { BlogPost } from '@/types/BlogPost';
 import { useAuth } from 'react-oidc-context';
+import BlogCard from '@/components/BlogCard';
+import questionmarkPic from '../../../public/question_mark.png';
 
 export default function BlogList() {
   const [posts, setPosts] = useState<Array<BlogPost> | null>(null);
+  const [drafts, setDrafts] = useState<Array<BlogPost> | null>(null);
+
+  const auth = useAuth();
 
   useEffect(() => {
+    if(auth.isLoading){return;}
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/all`);
-        setPosts(res.data);
+        let res = null;
+        if (auth.isAuthenticated){
+          res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/all`,{
+            headers: {
+              Authorization: `Bearer ${auth.user?.access_token}`
+            }
+          });
+        }else{
+          res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/all`);
+        }
+        const publishedBlogs = res.data.filter((blog: BlogPost) => blog.published);
+        const draftBlogs = res.data.filter((blog: BlogPost) => !blog.published);
+        setPosts(publishedBlogs);
+        setDrafts(draftBlogs);
       } catch (err) {
         console.error("Error fetching blog posts:", err);
       }
     };
     fetchData();
-  }, []);
+  }, [auth.isLoading, auth.isAuthenticated, auth.user?.access_token]);
 
-  const auth = useAuth();
+
+  const placeholderBlog: BlogPost = {
+    id: "#",
+    title: "Awesom Post",
+    coverImageUrl: questionmarkPic,
+    contentMarkdown: "",
+    published: true,
+  }
 
   return (
     <div style={{ maxWidth: '800px', margin: '0 auto', padding: '20px' }}>
-      {auth.isAuthenticated ? 
-        <Link href={"/blog/create"}>New Post</Link> : null}
-      <ul style={{ listStyle: 'none', padding: 0 }}>
-        {posts && posts.map((post) => {
-          if (!post.published) return;
-          return (
-          <li key={post.id} style={{ marginBottom: '40px' }}>
-            <Link href={`/blog/${post.id}`}>
-                <div style={{ display: 'flex', alignItems: 'center' }}>
-                  {post.coverImageUrl && 
-                    <Image
-                      src={post.coverImageUrl}
-                      alt={post.title || "Blog Image"}
-                      width={150}
-                      height={100}
-                      objectFit="cover"
-                      style={{ borderRadius: '8px', marginRight: '20px' }}
-                    />
-                  }
-                  <div>
-                    <h2>{post.title}</h2>
-                  </div>
-                </div>
-            </Link>
-          </li>
-        )}
-        )
-        }
-      </ul>
+      <div className='flex flex-row justify-between items-center'>
+        <h2 className="text-3xl font-bold mb-4">Blogs</h2>
+        {auth.isAuthenticated &&
+          <Link href={"/blog/create"} className="text-3xl font-bold mb-4">+</Link>}
+      </div>
+
+      <div className="space-y-6">
+        {posts && posts.length !== 0 ? posts.map((blog) => (
+          <BlogCard key={blog.id} blog={blog} />
+        )) : <BlogCard key={placeholderBlog.id!} blog={placeholderBlog} />}
+      </div>
+
+      {auth.isAuthenticated &&
+        <div className="mt-2">
+          <h2 className="text-3xl font-bold mb-4">Drafts</h2>
+          <div className="space-y-6">
+            {drafts && drafts.length !== 0 ? drafts.map((blog) => (
+              <BlogCard key={blog.id} blog={blog} />
+            )) : <BlogCard key={placeholderBlog.id!} blog={placeholderBlog} />}
+          </div>
+        </div>}
     </div>
   );
 };

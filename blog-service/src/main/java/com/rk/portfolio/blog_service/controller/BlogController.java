@@ -4,6 +4,9 @@ import com.rk.portfolio.blog_service.dto.PresignedResp;
 import com.rk.portfolio.blog_service.model.BlogPost;
 import com.rk.portfolio.blog_service.service.BlogService;
 import com.rk.portfolio.blog_service.service.S3Service;
+
+import lombok.extern.log4j.Log4j2;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
@@ -15,6 +18,7 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/blogs")
+@Log4j2
 public class BlogController {
 
     @Autowired
@@ -50,10 +54,21 @@ public class BlogController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<BlogPost> getPost(@PathVariable Long id) {
+    public ResponseEntity<BlogPost> getPostAdmin(
+            @RequestHeader("X-Is-Admin-User") String isAdmin,
+            @PathVariable Long id) {
         Optional<BlogPost> post = blogService.findById(id);
-        return post.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+
+        if (post.isPresent()) {
+            BlogPost postPreset = post.get();
+            if ("true".equals(isAdmin) || postPreset.isPublished()) {
+                return ResponseEntity.ok(postPreset);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
     @DeleteMapping("/{id}")
@@ -63,9 +78,17 @@ public class BlogController {
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<BlogPost>> listPosts() {
+    public ResponseEntity<List<BlogPost>> listPostsAdmin(
+            @RequestHeader("X-Is-Admin-User") String isAdmin) {
         List<BlogPost> posts = blogService.findAll();
-        return ResponseEntity.ok(posts);
+
+        if ("true".equals(isAdmin)) {
+            return ResponseEntity.ok(posts);
+        } else {
+            posts.removeIf(p -> p.isPublished() != true);
+            return ResponseEntity.ok(posts);
+        }
+
     }
 
     /**

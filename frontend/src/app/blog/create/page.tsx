@@ -198,7 +198,7 @@ export default function CreateBlogPage() {
 
       </div>
 
-      <button onClick={handleSubmit} style={{ marginTop: 16 }}>
+      <button onClick={handleSubmit} style={{ marginTop: 16, marginRight: 8 }}>
         Save
       </button>
       <button onClick={handleCancel} style={{ marginTop: 16 }}>

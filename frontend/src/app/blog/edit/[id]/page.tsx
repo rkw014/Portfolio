@@ -130,16 +130,22 @@ export default function EditBlogPage() {
 
   useEffect(() => {
     if (!id) return;
+    if(auth.isLoading){return;}
+    if(!auth.user?.access_token){return;}
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`);
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`,{
+          headers: {
+            Authorization: `Bearer ${auth.user?.access_token}`
+          }
+        });
         setPost(res.data);
       } catch (err) {
         console.error("Error fetching blog post:", err);
       }
     };
     fetchData();
-  }, [id]);
+  }, [auth.isLoading, auth.user?.access_token, id]);
 
   const handleUpdate = async () => {
     if (!post) return;
@@ -179,7 +185,9 @@ export default function EditBlogPage() {
 
           <label>Cover Image URL:</label>
           <input
-            value={post.coverImageUrl || ""}
+            value={ typeof post.coverImageUrl === "string"
+              ? post.coverImageUrl
+              : post.coverImageUrl?.src || ""}
             onChange={(e) => { setAltered(); setPost({ ...post, coverImageUrl: e.target.value }); }}
             style={{ width: "100%", marginBottom: 12 }}
           />
@@ -206,7 +214,7 @@ export default function EditBlogPage() {
             />
           </div>
 
-          <button onClick={handleUpdate} style={{ marginTop: 16 }}>
+          <button onClick={handleUpdate} style={{ marginTop: 16, marginRight: 8 }}>
             Save
           </button>
           <button onClick={handleCancel} style={{ marginTop: 16 }}>
