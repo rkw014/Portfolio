@@ -39,7 +39,7 @@ export default function Home() {
     title: "More to Come...",
     year: "...",
     imgUrl: questionmarkPic,
-    description: "Awesom Project beeing made",
+    description: "Awesome Project beeing made",
     content: "",
     link: "#",
     category: "",
@@ -68,7 +68,7 @@ export default function Home() {
 
   const placeholderBlog: BlogPost = {
     id: "#",
-    title: "Awesom Post",
+    title: "Awesome Post",
     coverImageUrl: questionmarkPic,
     contentMarkdown: "",
     published: true,

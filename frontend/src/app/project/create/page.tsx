@@ -119,14 +119,22 @@ export default function CreateProjectPage() {
     return {
       "toolbar": {
         "container": [
-          [{ header: [1, 2, false] }],
-          ['bold', 'italic', 'underline'],
-          ['image', 'code-block'],
+          [{ header: [1, 2, 3, 4, 5, 6, false] }],
+          [{ 'font': [] }],
+          [{ 'size': ['small', false, 'large', 'huge'] }],
+          ['bold', 'italic', 'underline', 'strike', 'code'],
+          ['code-block', 'blockquote', 'link', 'image'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+          [{ 'script': 'sub' }, { 'script': 'super' }],
+          [{ 'indent': '-1' }, { 'indent': '+1' }],
+          [{ 'align': [] }],
+          [{ 'color': [] }, { 'background': [] }],
+          ['clean']
         ],
         "handlers": {
           image: handleImage,
         }
-      }
+      },
     }
   }, [handleImage]);
 
