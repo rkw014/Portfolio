@@ -12,6 +12,7 @@ import { BlogPost } from "../../../../types/BlogPost";
 import { editorProps } from "@/types/EditorProps";
 import ReactQuill from "react-quill-new";
 
+
 // Dynamically import react-quill to avoid SSR issues
 // https://stackoverflow.com/questions/60458247/how-to-access-reactquill-ref-when-using-dynamic-import-in-nextjs
 const Editor = dynamic(async () => {
@@ -21,14 +22,14 @@ const Editor = dynamic(async () => {
   ) => <RQ ref={ref} {...props} />;
   return comp;
 
-}, { ssr: false });
+}, { ssr: false, loading: ()=><div>Loading...</div>});
 
 export default function EditBlogPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id;
 
-  
+
   const [post, setPost] = useState<BlogPost | null>(null);
   const [altered, setAlter] = useState<number>(0);
   const setAltered = () => {
@@ -115,14 +116,22 @@ export default function EditBlogPage() {
     return {
       "toolbar": {
         "container": [
-          [{ header: [1, 2, false] }],
-          ['bold', 'italic', 'underline'],
-          ['image', 'code-block'],
+          [{ header: [1, 2, 3, 4, 5, 6, false] }],
+          [{ 'font': [] }],
+          [{ 'size': ['small', false, 'large', 'huge'] }],
+          ['bold', 'italic', 'underline', 'strike', 'code'],
+          ['code-block', 'blockquote', 'link', 'image'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+          [{ 'script': 'sub' }, { 'script': 'super' }],
+          [{ 'indent': '-1' }, { 'indent': '+1' }],
+          [{ 'align': [] }],
+          [{ 'color': [] }, { 'background': [] }],
+          ['clean']
         ],
         "handlers": {
           image: handleImage,
         }
-      }
+      },
     }
   }
     , [handleImage]);
@@ -130,11 +139,11 @@ export default function EditBlogPage() {
 
   useEffect(() => {
     if (!id) return;
-    if(auth.isLoading){return;}
-    if(!auth.user?.access_token){return;}
+    if (auth.isLoading) { return; }
+    if (!auth.user?.access_token) { return; }
     const fetchData = async () => {
       try {
-        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`,{
+        const res = await axios.get(`${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/${id}`, {
           headers: {
             Authorization: `Bearer ${auth.user?.access_token}`
           }
@@ -185,7 +194,7 @@ export default function EditBlogPage() {
 
           <label>Cover Image URL:</label>
           <input
-            value={ typeof post.coverImageUrl === "string"
+            value={typeof post.coverImageUrl === "string"
               ? post.coverImageUrl
               : post.coverImageUrl?.src || ""}
             onChange={(e) => { setAltered(); setPost({ ...post, coverImageUrl: e.target.value }); }}
@@ -204,7 +213,7 @@ export default function EditBlogPage() {
           <div style={{ marginTop: 12 }}>
             <label>Content:</label>
             <Editor
-              key = {"quill-editor"}
+              key={"quill-editor"}
               theme="snow"
               ref={quillRef}
               defaultValue={post.contentMarkdown}

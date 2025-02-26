@@ -29,26 +29,26 @@ export default function CreateBlogPage() {
   const router = useRouter();
 
   const quillRef = useRef<ReactQuill>(null);
-  
+
   const [altered, setAlter] = useState<number>(0);
-  const setAltered = () =>{
+  const setAltered = () => {
     if (altered > 1) return;
     setAlter(altered + 1);
   };
 
   // Get token from OIDC context
-    const auth = useAuth();
-    const [token, setToken] = useState("");
-    useEffect(() => {
-      if (!auth.isLoading && !auth.isAuthenticated) {
-        router.replace(`/`);
-      }
-      if (auth.isAuthenticated) {
-        setToken(auth.user?.access_token || "");
-      }
-    }, [auth, router]);
+  const auth = useAuth();
+  const [token, setToken] = useState("");
+  useEffect(() => {
+    if (!auth.isLoading && !auth.isAuthenticated) {
+      router.replace(`/`);
+    }
+    if (auth.isAuthenticated) {
+      setToken(auth.user?.access_token || "");
+    }
+  }, [auth, router]);
 
-  const handleImage = useCallback( async () => {
+  const handleImage = useCallback(async () => {
     const input = document.createElement('input');
     input.setAttribute('type', 'file');
     input.setAttribute('accept', 'image/*');
@@ -61,27 +61,27 @@ export default function CreateBlogPage() {
       if (file) {
         try {
           // 请求后端获取预签名 URL
-          
+
           const res = await axios.get(
-            `${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/presign`, 
+            `${process.env.NEXT_PUBLIC_GATEWAY_URI}/api/blogs/presign`,
             {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            params: {
-              filename: file.name,
-            }
-          });
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+              params: {
+                filename: file.name,
+              }
+            });
 
           if (res.status === 200) {
             const { presignedUrl, publicUrl } = res.data;
 
             // 使用预签名 URL 上传图片
             const uploadResponse = await axios.put(
-              presignedUrl, 
+              presignedUrl,
               file,
               {
-                headers:{
+                headers: {
                   "Content-Type": file.type,
                 }
               }
@@ -89,7 +89,7 @@ export default function CreateBlogPage() {
 
             if (uploadResponse.status === 200) {
               // 插入图片到编辑器
-              if (!quillRef.current) {return;}
+              if (!quillRef.current) { return; }
               const editor = quillRef.current.getEditor();
               const range = editor.getSelection();
               if (!range) return;
@@ -108,20 +108,28 @@ export default function CreateBlogPage() {
     };
   }, [token]);
 
-  const RQmodule = useMemo( () => 
-    { return {
-        "toolbar": {
-          "container": [
-            [{ header: [1, 2, false] }],
-            ['bold', 'italic', 'underline'],
-            ['image', 'code-block'],
-          ],
-          "handlers": {
-            image: handleImage,
-          }
+  const RQmodule = useMemo(() => {
+    return {
+      "toolbar": {
+        "container": [
+          [{ header: [1, 2, 3, 4, 5, 6, false] }],
+          [{ 'font': [] }],
+          [{ 'size': ['small', false, 'large', 'huge'] }],
+          ['bold', 'italic', 'underline', 'strike', 'code'],
+          ['code-block', 'blockquote', 'link', 'image'],
+          [{ 'list': 'ordered' }, { 'list': 'bullet' }, { 'list': 'check' }],
+          [{ 'script': 'sub' }, { 'script': 'super' }],
+          [{ 'indent': '-1' }, { 'indent': '+1' }],
+          [{ 'align': [] }],
+          [{ 'color': [] }, { 'background': [] }],
+          ['clean']
+        ],
+        "handlers": {
+          image: handleImage,
         }
-      }
+      },
     }
+  }
     , [handleImage]);
 
 
@@ -166,14 +174,14 @@ export default function CreateBlogPage() {
       <label>Title:</label>
       <input
         value={title}
-        onChange={(e) => {setAltered(); setTitle(e.target.value)}}
+        onChange={(e) => { setAltered(); setTitle(e.target.value) }}
         style={{ width: "100%", marginBottom: 12 }}
       />
 
       <label>Cover Image URL:</label>
       <input
         value={coverImageUrl}
-        onChange={(e) => {setAltered(); setCoverImageUrl(e.target.value)}}
+        onChange={(e) => { setAltered(); setCoverImageUrl(e.target.value) }}
         style={{ width: "100%", marginBottom: 12 }}
       />
 
@@ -182,19 +190,19 @@ export default function CreateBlogPage() {
         <input
           type="checkbox"
           checked={published}
-          onChange={(e) => {setAltered(); setPublished(e.target.checked)}}
+          onChange={(e) => { setAltered(); setPublished(e.target.checked) }}
         />
       </div>
 
       <div style={{ marginTop: 12 }}>
         <label>Content:</label>
-          <Editor 
-            ref={quillRef}
-            theme="snow" 
-            value={content} 
-            onChange={(v: string)=>{setAltered(); setContent(v)}} 
-            modules={RQmodule}
-          />
+        <Editor
+          ref={quillRef}
+          theme="snow"
+          value={content}
+          onChange={(v: string) => { setAltered(); setContent(v) }}
+          modules={RQmodule}
+        />
 
       </div>
 
